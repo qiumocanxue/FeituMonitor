@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="feitu_blue">#0A59F7</color>
+    <color name="feitu_bg_light">#F5F7FA</color>
+    <color name="pure_white">#FFFFFF</color>
+    <color name="feitu_gray">#8A8A8A</color>
+    <color name="text_main">#1D1D1F</color>
+    <color name="text_secondary">#86868B</color>
+    <color name="error_red">#FF5252</color>
+    <color name="feitu_black">#000000</color>
+</resources>

@@ -1,0 +1,26 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <style name="Base.Theme.FeituMonitor" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="colorPrimary">@color/feitu_blue</item>
+    </style>
+
+    <style name="Theme.FeituMonitor" parent="Base.Theme.FeituMonitor" />
+
+    <style name="FeituDatePickerTheme" parent="Theme.MaterialComponents.Light.Dialog.Alert">
+        <item name="colorPrimary">@color/feitu_blue</item>
+        <item name="colorAccent">@color/feitu_blue</item>
+
+        <item name="android:buttonBarPositiveButtonStyle">@style/FeituDialogButton</item>
+        <item name="android:buttonBarNegativeButtonStyle">@style/FeituDialogButton</item>
+
+        <item name="shapeAppearanceOverlay">@style/RoundedShapeAppearance</item>
+    </style>
+
+    <style name="RoundedShapeAppearance" parent="">
+        <item name="cornerSize">16dp</item>
+    </style>
+
+    <style name="FeituDialogButton" parent="Widget.MaterialComponents.Button.TextButton.Dialog">
+        <item name="android:textColor">@color/feitu_blue</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+</resources>
