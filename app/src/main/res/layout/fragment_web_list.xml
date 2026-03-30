@@ -24,8 +24,10 @@
             android:visibility="gone" />
 
         <com.google.android.material.card.MaterialCardView
+            android:id="@+id/card_quick_fill"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:visibility="gone"
             app:cardCornerRadius="8dp"
             app:cardElevation="1dp"
             app:strokeWidth="0.5dp"
@@ -40,7 +42,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="快速填充"
+                    android:text="@string/title_quick_fill"
                     android:textColor="@color/feitu_blue"
                     android:textSize="13sp"
                     android:textStyle="bold"
@@ -50,7 +52,7 @@
                     style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="选择医院配置"
+                    android:hint="@string/hint_select_config"
                     app:boxStrokeColor="@color/feitu_blue"
                     app:hintTextColor="@color/feitu_blue"
                     app:boxCornerRadiusTopStart="16dp"
@@ -65,8 +67,8 @@
                         android:layout_height="wrap_content"
                         android:inputType="none"
                         android:textSize="14sp"
-                        android:paddingVertical="10dp" />
-                </com.google.android.material.textfield.TextInputLayout>
+                        android:paddingVertical="10dp"
+                        android:hint="@string/hint_select_config" /> </com.google.android.material.textfield.TextInputLayout>
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
@@ -88,7 +90,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="接口参数设置"
+                    android:text="@string/title_interface_params"
                     android:textColor="@color/feitu_blue"
                     android:textSize="13sp"
                     android:textStyle="bold"
@@ -98,7 +100,7 @@
                     style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="医院编码 (hsCode)"
+                    android:hint="@string/hint_hs_code"
                     app:boxStrokeColor="@color/feitu_blue"
                     app:boxCornerRadiusTopStart="16dp"
                     app:boxCornerRadiusTopEnd="16dp"
@@ -117,7 +119,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
-                    android:hint="Access Key"
+                    android:hint="@string/hint_access_key"
                     app:boxStrokeColor="@color/feitu_blue"
                     app:boxCornerRadiusTopStart="16dp"
                     app:boxCornerRadiusTopEnd="16dp"
@@ -136,7 +138,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
-                    android:hint="Access Secret"
+                    android:hint="@string/hint_access_secret"
                     app:boxStrokeColor="@color/feitu_blue"
                     app:boxCornerRadiusTopStart="16dp"
                     app:boxCornerRadiusTopEnd="16dp"
@@ -163,7 +165,7 @@
                         android:id="@+id/rb_patNo"
                         android:layout_width="match_parent"
                         android:layout_height="40dp"
-                        android:text="患者编号 (patNo)"
+                        android:text="@string/query_key_pat_no"
                         android:checked="true"
                         android:textSize="13sp"
                         android:buttonTint="@color/feitu_blue" />
@@ -171,21 +173,21 @@
                         android:id="@+id/rb_clinicId"
                         android:layout_width="match_parent"
                         android:layout_height="40dp"
-                        android:text="就诊卡号 (clinicId)"
+                        android:text="@string/query_key_clinic_id"
                         android:textSize="13sp"
                         android:buttonTint="@color/feitu_blue" />
                     <RadioButton
                         android:id="@+id/rb_patIcCard"
                         android:layout_width="match_parent"
                         android:layout_height="40dp"
-                        android:text="身份证号 (patIcCard)"
+                        android:text="@string/query_key_pat_ic_card"
                         android:textSize="13sp"
                         android:buttonTint="@color/feitu_blue" />
                     <RadioButton
                         android:id="@+id/rb_hisId2"
                         android:layout_width="match_parent"
                         android:layout_height="40dp"
-                        android:text="全院唯一码 (hisId2)"
+                        android:text="@string/query_key_his_id2"
                         android:textSize="13sp"
                         android:buttonTint="@color/feitu_blue" />
                 </RadioGroup>
@@ -195,7 +197,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
-                    android:hint="查询值 (queryValue)"
+                    android:hint="@string/hint_query_value"
                     app:boxStrokeColor="@color/feitu_blue"
                     app:boxCornerRadiusTopStart="16dp"
                     app:boxCornerRadiusTopEnd="16dp"
@@ -216,7 +218,7 @@
             android:layout_width="match_parent"
             android:layout_height="48dp"
             android:layout_marginTop="20dp"
-            android:text="生成并预览链接"
+            android:text="@string/btn_generate_preview"
             android:textSize="15sp"
             android:backgroundTint="@color/feitu_blue"
             app:cornerRadius="8dp" />
@@ -251,7 +253,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="复制链接"
+                    android:text="@string/btn_copy_link"
                     android:textColor="@color/feitu_blue" />
                 <Button
                     android:id="@+id/btn_browser"
@@ -259,22 +261,23 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="浏览器打开"
+                    android:text="@string/btn_open_browser"
                     android:textColor="@color/feitu_blue" />
             </LinearLayout>
 
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="504dp"
                 android:layout_marginTop="12dp"
                 app:cardCornerRadius="8dp"
                 app:cardElevation="2dp"
                 app:strokeWidth="0.5dp"
                 app:strokeColor="#DDDDDD">
+
                 <WebView
                     android:id="@+id/web_view"
                     android:layout_width="match_parent"
-                    android:layout_height="500dp" />
+                    android:layout_height="match_parent" />
             </com.google.android.material.card.MaterialCardView>
         </LinearLayout>
     </LinearLayout>

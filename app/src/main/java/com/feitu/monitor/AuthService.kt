@@ -1,8 +1,9 @@
 package com.feitu.monitor
 
-import com.feitu.monitor.models.*
 import android.content.Context
 import android.util.Log
+import androidx.core.content.edit
+import com.feitu.monitor.models.*
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import kotlinx.coroutines.Dispatchers
@@ -13,7 +14,7 @@ import okhttp3.Request
 import okhttp3.Response
 import org.json.JSONObject
 
-class AuthService(private val context: Context) {
+class AuthService(context: Context) {
 
     companion object {
         // ⚠️ 局域网调试请使用具体 IP，模拟器使用 10.0.2.2
@@ -37,7 +38,6 @@ class AuthService(private val context: Context) {
             val url = "$BASE_URL/token"
 
             try {
-                // 构建 x-www-form-urlencoded 类型的 Request Body
                 val formBody = FormBody.Builder()
                     .add("username", username)
                     .add("password", password)
@@ -48,66 +48,54 @@ class AuthService(private val context: Context) {
                     .post(formBody)
                     .build()
 
-                // 执行请求 (execute 是同步阻塞的，但我们在 IO 线程所以没关系)
                 client.newCall(request).execute().use { response ->
                     val responseString = response.body?.string() ?: "{}"
                     val jsonObject = JSONObject(responseString)
 
                     if (response.isSuccessful) {
-                        // --- 成功逻辑 ---
                         val token = jsonObject.getString("access_token")
 
-                        // 写入 SharedPreferences
-                        prefs.edit()
-                            .putString("jwt_token", token)
-                            .putString("username", username)
-                            .apply()
+                        // 🌟 修复 2：使用 KTX 扩展写法，无需手动写 apply()
+                        prefs.edit {
+                            putString("jwt_token", token)
+                            putString("username", username)
+                        }
 
                         return@withContext LoginResult(true, "登录成功")
                     } else {
-                        // --- 失败逻辑 ---
                         val errorDetail = jsonObject.optString("detail", "登录失败")
-
-                        return@withContext if (response.code == 429) {
-                            LoginResult(false, "⛔ $errorDetail")
-                        } else {
-                            LoginResult(false, "❌ $errorDetail")
-                        }
+                        return@withContext LoginResult(false, if (response.code == 429) "⛔ $errorDetail" else "❌ $errorDetail")
                     }
                 }
             } catch (e: Exception) {
-                // --- 网络异常逻辑 ---
                 Log.e("AuthService", "登录异常", e)
                 return@withContext LoginResult(false, "⚠️ 网络连接错误，请检查服务器")
             }
         }
 
     // 检查是否已登录
-    fun isLoggedIn(): Boolean {
-        return prefs.contains("jwt_token")
-    }
+    fun isLoggedIn(): Boolean = prefs.contains("jwt_token")
 
     // 登出
     fun logout() {
-        prefs.edit()
-            .remove("jwt_token")
-            .remove("username")
-            .apply()
+        prefs.edit {
+            remove("jwt_token")
+            remove("username")
+        }
     }
 
     // 获取 Token
-    fun getToken(): String? {
-        return prefs.getString("jwt_token", null)
-    }
+    fun getToken(): String? = prefs.getString("jwt_token", null)
+
+    fun getUserName(): String = prefs.getString("username", "管理员") ?: "管理员"
 
     // 检查响应头，如果有新 Token 就自动更新
     private fun checkAndSaveNewToken(response: Response) {
-        // 获取响应头 (OkHttp 获取 Header 不区分大小写)
         val newToken = response.header("x-new-token")
-
         if (!newToken.isNullOrEmpty()) {
             Log.d("AuthService", "🔄 [AutoRefresh] 收到新 Token，正在更新本地存储...")
-            prefs.edit().putString("jwt_token", newToken).apply()
+            // 🌟 修复 4：更新 Token
+            prefs.edit { putString("jwt_token", newToken) }
         }
     }
 

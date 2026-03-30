@@ -1,3 +1,88 @@
 <resources>
     <string name="app_name">飞图运维工具-安卓</string>
+    <string name="menu_user_placeholder">用户</string>
+    <string name="menu_settings">软件设置</string>
+    <string name="menu_logout">退出登录</string>
+    <string name="user_not_logged_in">未登录</string>
+    <string name="user_login_action">登录</string>
+    <string name="user_logout_action">退出登录</string>
+    <string name="title_ftp_root">FTP: /</string>
+    <string name="desc_back">返回</string>
+    <string name="desc_download_list">下载列表</string>
+    <string name="desc_refresh">刷新</string>
+    <string name="loading">正在加载&#8230;</string>
+    <string name="preview_default">预览</string>
+    <string name="load_failed">加载失败: HTTP %1$d</string>
+    <string name="connection_error">连接错误: %1$s</string>
+    <string name="title_download_list">下载记录</string>
+    <string name="total_space_usage">总占用空间: %1$s</string>
+
+    <string name="status_downloading">%1$s / %2$s (%3$s)</string>
+    <string name="status_paused">已暂停 - %1$s / %2$s</string>
+    <string name="status_completed">下载完成 - %1$s</string>
+    <string name="status_failed">下载失败: %1$s</string>
+    <string name="status_waiting">等待中&#8230;</string>
+
+    <string name="action_pause">暂停</string>
+    <string name="action_resume">继续</string>
+    <string name="action_open">打开文件</string>
+    <string name="action_retry">重试</string>
+
+    <string name="dialog_delete_title">删除任务</string>
+    <string name="dialog_delete_msg">确定要删除记录吗？\n如果已下载完成，本地文件也会被删除。</string>
+    <string name="delete">删除</string>
+    <string name="cancel">取消</string>
+    <string name="title_query_params">查询参数</string>
+    <string name="hint_quick_fill">快速填充 (医院配置)</string>
+    <string name="hint_accession">检查号 (AccessionNumber)</string>
+    <string name="hint_hscode">医院编码 (HsCode)</string>
+    <string name="btn_pick_date">选择检查日期</string>
+
+    <string name="title_crypto_settings">安全加密设置</string>
+    <string name="hint_aes_key">AES Key</string>
+    <string name="hint_aes_iv">AES IV</string>
+    <string name="btn_generate_qr">生成影像二维码</string>
+
+    <string name="title_link_analysis">链接解析与验证</string>
+    <string name="btn_scan">扫码</string>
+    <string name="hint_paste_url">粘贴 URL</string>
+    <string name="btn_parse">立即解析并解密</string>
+
+    <string name="desc_qr_code">生成的二维码预览图</string>
+    <string name="btn_share_qr">分享/保存二维码图片</string>
+    <string name="desc_delete_task">删除下载任务</string>
+
+    <string name="title_quick_fill">快速填充</string>
+    <string name="hint_select_config">选择医院配置</string>
+    <string name="title_interface_params">接口参数设置</string>
+    <string name="hint_hs_code">医院编码 (hsCode)</string>
+    <string name="hint_access_key">Access Key</string>
+    <string name="hint_access_secret">Access Secret</string>
+    <string name="query_key_pat_no">患者编号 (patNo)</string>
+    <string name="query_key_clinic_id">就诊卡号 (clinicId)</string>
+    <string name="query_key_pat_ic_card">身份证号 (patIcCard)</string>
+    <string name="query_key_his_id2">全院唯一码 (hisId2)</string>
+    <string name="hint_query_value">查询值 (queryValue)</string>
+    <string name="btn_generate_preview">生成并预览链接</string>
+    <string name="btn_copy_link">复制链接</string>
+    <string name="btn_open_browser">浏览器打开</string>
+
+    <string name="ftp_title">FTP: %1$s</string>
+    <string name="ftp_meta_format">%1$s  |  %2$s</string>
+    <string name="load_failed_msg">加载失败: %1$s</string>
+    <string name="action_preview">预览</string>
+    <string name="action_download">下载</string>
+    <string name="action_cancel">取消</string>
+    <string name="dialog_title_file_ops">操作文件</string>
+    <string name="dialog_msg_file_ops">您要直接预览该文件，还是将其下载并永久保存？</string>
+    <string name="toast_download_added">已加入下载队列</string>
+    <string name="toast_cache_restored">已从缓存直接恢复，下载完成</string>
+
+    <string name="label_date">日期: %1$s</string>
+    <string name="toast_quick_select">已快速选择: %1$s</string>
+    <string name="parse_result_format">医院ID: %1$s\n日期: %2$s\n查询内容: %3$s</string>
+    <string name="parse_decrypt_format">\n\n解密结果: %1$s</string>
+    <string name="decrypt_failed">解密失败: 请检查 Key/IV 是否正确</string>
+    <string name="key_iv_length_error">Key/IV 长度需为 16 位</string>
+    <string name="date_prefix">日期: %1$s</string>
 </resources>

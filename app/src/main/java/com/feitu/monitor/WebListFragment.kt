@@ -1,24 +1,25 @@
 package com.feitu.monitor
 
+import android.annotation.SuppressLint
 import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
-import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import android.view.View
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import android.widget.*
+import androidx.core.net.toUri // 🌟 需要导入 KTX 扩展
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
-import com.feitu.monitor.models.OaConfig
 import kotlinx.coroutines.launch
 import java.security.MessageDigest
 
 class WebListFragment : Fragment(R.layout.fragment_web_list) {
 
-    // 使用 lateinit 必须确保在 onViewCreated 中全部初始化
     private lateinit var hsCodeEt: EditText
     private lateinit var accessKeyEt: EditText
     private lateinit var accessSecretEt: EditText
@@ -31,18 +32,18 @@ class WebListFragment : Fragment(R.layout.fragment_web_list) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // 1. 顶部状态栏占位适配
+        // 🌟 1. 修复状态栏适配：弃用 getIdentifier，改用 WindowInsets
         val statusBarSpacer = view.findViewById<View>(R.id.status_bar_spacer)
-        statusBarSpacer?.layoutParams?.let { params ->
-            val resourceId = resources.getIdentifier("status_bar_height", "dimen", "android")
-            if (resourceId > 0) {
-                params.height = resources.getDimensionPixelSize(resourceId)
-                statusBarSpacer.layoutParams = params
-                statusBarSpacer.visibility = View.VISIBLE // 只有找到了才显示
+        ViewCompat.setOnApplyWindowInsetsListener(view) { _, insets ->
+            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            statusBarSpacer?.apply {
+                layoutParams.height = systemBars.top
+                visibility = View.VISIBLE
             }
+            insets
         }
 
-        // 2. 初始化 View (必须与新 XML 中的 ID 完全对应)
+        // 2. 初始化 View
         hsCodeEt = view.findViewById(R.id.et_hs_code)
         accessKeyEt = view.findViewById(R.id.et_access_key)
         accessSecretEt = view.findViewById(R.id.et_access_secret)
@@ -52,12 +53,10 @@ class WebListFragment : Fragment(R.layout.fragment_web_list) {
         setupWebView()
         setupRadioGroup(view)
 
-        // 3. 按钮点击事件
         view.findViewById<Button>(R.id.btn_generate).setOnClickListener { generateLink(view) }
         view.findViewById<Button>(R.id.btn_copy).setOnClickListener { copyToClipboard() }
         view.findViewById<Button>(R.id.btn_browser).setOnClickListener { openInBrowser() }
 
-        // 4. 加载配置列表
         loadConfigs(view)
     }
 
@@ -66,24 +65,28 @@ class WebListFragment : Fragment(R.layout.fragment_web_list) {
         (activity as? MainActivity)?.updateToolbarTitle("公众号工具")
     }
 
+    // 🌟 3. 修复 WebView 安全警告
+    @SuppressLint("SetJavaScriptEnabled") // 明确由于业务需要开启 JS，并确保 URL 安全
     private fun setupWebView() {
-        webView.settings.javaScriptEnabled = true
+        webView.settings.apply {
+            javaScriptEnabled = true
+            // 额外安全设置
+            allowFileAccess = false
+            allowContentAccess = false
+        }
         webView.webViewClient = WebViewClient()
     }
 
     private fun setupRadioGroup(view: View) {
         val radioGroup = view.findViewById<RadioGroup>(R.id.rg_query_key)
-
         radioGroup.setOnCheckedChangeListener { _, checkedId ->
             selectedQueryKey = when (checkedId) {
                 R.id.rb_patNo -> "patNo"
                 R.id.rb_clinicId -> "clinicId"
-                R.id.rb_patIcCard -> "patIcCard" // 🌟 身份证
-                R.id.rb_hisId2 -> "hisId2"       // 🌟 唯一码
+                R.id.rb_patIcCard -> "patIcCard"
+                R.id.rb_hisId2 -> "hisId2"
                 else -> "patNo"
             }
-            // 打印一下，确认选中的 Key 对不对
-            Log.d("FeituWeb", "当前选择的查询维度: $selectedQueryKey")
         }
     }
 
@@ -94,26 +97,12 @@ class WebListFragment : Fragment(R.layout.fragment_web_list) {
         val value = queryValueEt.text.toString().trim()
 
         val raw = when (selectedQueryKey) {
-            "patNo" -> {
-                // accesskey + hospitalId + patNo + timeStamp + accessSecret
-                "accesskey${key}hospitalId${hsCode}patNo${value}timeStamp${timeStamp}accessSecret${secret}"
-            }
-            "clinicId" -> {
-                // accesskey + clinicId + hospitalId + timeStamp + accessSecret
-                "accesskey${key}clinicId${value}hospitalId${hsCode}timeStamp${timeStamp}accessSecret${secret}"
-            }
-            "patIcCard" -> {
-                // accesskey + hospitalId + patIcCard + timeStamp + accessSecret
-                "accesskey${key}hospitalId${hsCode}patIcCard${value}timeStamp${timeStamp}accessSecret${secret}"
-            }
-            "hisId2" -> {
-                // accesskey + hisId2 + hospitalId + timeStamp + accessSecret
-                "accesskey${key}hisId2${value}hospitalId${hsCode}timeStamp${timeStamp}accessSecret${secret}"
-            }
+            "patNo" -> "accesskey${key}hospitalId${hsCode}patNo${value}timeStamp${timeStamp}accessSecret${secret}"
+            "clinicId" -> "accesskey${key}clinicId${value}hospitalId${hsCode}timeStamp${timeStamp}accessSecret${secret}"
+            "patIcCard" -> "accesskey${key}hospitalId${hsCode}patIcCard${value}timeStamp${timeStamp}accessSecret${secret}"
+            "hisId2" -> "accesskey${key}hisId2${value}hospitalId${hsCode}timeStamp${timeStamp}accessSecret${secret}"
             else -> ""
         }
-
-        Log.d("FeituWeb", "待签名原始字符串: $raw")
         return md5(raw).uppercase()
     }
 
@@ -121,7 +110,9 @@ class WebListFragment : Fragment(R.layout.fragment_web_list) {
         val timeStamp = System.currentTimeMillis().toString()
         val sign = calculateSign(timeStamp)
 
-        val builder = Uri.parse("https://yyx.ftimage.cn/open/index.html").buildUpon()
+        // 🌟 4. 修复 KTX 扩展警告：使用 .toUri()
+        val baseUri = "https://yyx.ftimage.cn/open/index.html".toUri()
+        val builder = baseUri.buildUpon()
             .appendQueryParameter("hsCode", hsCodeEt.text.toString().trim())
             .appendQueryParameter("queryKey", selectedQueryKey)
             .appendQueryParameter("queryValue", queryValueEt.text.toString().trim())
@@ -138,43 +129,36 @@ class WebListFragment : Fragment(R.layout.fragment_web_list) {
     }
 
     private fun loadConfigs(view: View) {
-        // 1. 这里的 ID 必须对应 XML 里的 AutoCompleteTextView
+        val cardQuickFill = view.findViewById<View>(R.id.card_quick_fill)
         val autoCompleteTextView = view.findViewById<AutoCompleteTextView>(R.id.spinner_configs)
         val authService = AuthService(requireContext())
 
+        if (!authService.isLoggedIn()) {
+            cardQuickFill?.visibility = View.GONE
+            return
+        }
+
         lifecycleScope.launch {
             try {
-                // 2. 从网络获取配置
                 val configs = authService.getOaConfigs()
-
-                // 打印一下，看看后台到底有没有给数据
-                Log.d("FeituWeb", "获取到 OA 配置数量: ${configs.size}")
-
                 if (configs.isNotEmpty()) {
-                    // 3. 数据回来后，再创建并设置适配器
+                    cardQuickFill?.visibility = View.VISIBLE
                     val names = configs.map { it.hospitalName ?: "未知医院" }
-                    val adapter = ArrayAdapter(
-                        requireContext(),
-                        android.R.layout.simple_dropdown_item_1line, // 使用系统标准简易列表样式
-                        names
-                    )
+                    val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_dropdown_item_1line, names)
                     autoCompleteTextView.setAdapter(adapter)
 
-                    // 4. 设置点击填充逻辑
                     autoCompleteTextView.setOnItemClickListener { _, _, position, _ ->
                         val selected = configs[position]
                         hsCodeEt.setText(selected.hsCode ?: "")
                         accessKeyEt.setText(selected.accessKey ?: "")
                         accessSecretEt.setText(selected.accessSecret ?: "")
-
-                        Toast.makeText(context, "已加载: ${selected.hospitalName}", Toast.LENGTH_SHORT).show()
                     }
                 } else {
-                    autoCompleteTextView.setText("暂无预设配置")
+                    cardQuickFill?.visibility = View.GONE
                 }
             } catch (e: Exception) {
-                Log.e("FeituWeb", "加载配置异常: ${e.message}")
-                autoCompleteTextView.setText("加载失败")
+                Log.e("FeituWeb", "加载配置失败: ${e.message}") // 这样 e 就被使用了，警告也会消失
+                cardQuickFill?.visibility = View.GONE
             }
         }
     }
@@ -192,7 +176,8 @@ class WebListFragment : Fragment(R.layout.fragment_web_list) {
 
     private fun openInBrowser() {
         if (generatedUrl.isNotEmpty()) {
-            startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(generatedUrl)))
+            // 🌟 5. 修复 KTX 扩展警告：使用 .toUri()
+            startActivity(Intent(Intent.ACTION_VIEW, generatedUrl.toUri()))
         }
     }
 }
