@@ -60,7 +60,7 @@ dependencies {
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
-    
+
     implementation(libs.jpush)
     implementation(libs.zxing.android.embedded)
     implementation(libs.kotlinx.coroutines.android)
