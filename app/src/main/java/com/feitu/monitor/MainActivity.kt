@@ -138,7 +138,6 @@ class MainActivity : AppCompatActivity() {
         popup.setOnMenuItemClickListener { item ->
             when (item.itemId) {
                 1 -> {
-                    // 🌟 核心功能：显示当前缓存情况
                     val cacheSize = FtpUtils.getPreviewCacheSize(this)
 
                     AlertDialog.Builder(this)
@@ -180,7 +179,6 @@ class MainActivity : AppCompatActivity() {
             .show()
     }
 
-    // 🌟 核心函数：现在只保留这一个唯一的版本
     private fun refreshUIByLoginState() {
         val isLoggedIn = authService.isLoggedIn()
 
@@ -219,7 +217,7 @@ class MainActivity : AppCompatActivity() {
             when (item.itemId) {
                 R.id.nav_qrcode -> { switchFragment(QrGeneratorFragment()); true }
                 R.id.nav_wechat -> { switchFragment(WebListFragment()); true }
-                R.id.nav_monitor -> true
+                R.id.nav_monitor -> { switchFragment(MonitorFragment()); true }
                 R.id.nav_file -> { switchFragment(FileCenterFragment()); true }
                 R.id.nav_config -> true
                 else -> false

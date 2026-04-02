@@ -21,7 +21,7 @@ android {
 
         // 极光配置 (注意 Kotlin DSL 的写法)
         manifestPlaceholders["JPUSH_PKGNAME"] = applicationId!!
-        manifestPlaceholders["JPUSH_APPKEY"] = "f8dadd125e47950b93043b1d" // 填入了你的真实 AppKey
+        manifestPlaceholders["JPUSH_APPKEY"] = "f8dadd125e47950b93043b1d"
         manifestPlaceholders["JPUSH_CHANNEL"] = "developer-default"
 
         // 小米通道 (JPush 5.5.3 开始不需要 MI- 前缀)
@@ -48,26 +48,27 @@ android {
 }
 
 dependencies {
+    // 基础库
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
     implementation(libs.androidx.activity)
     implementation(libs.androidx.constraintlayout)
+    implementation(libs.androidx.camera.camera2.pipe)
+
+    // 单元测试
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
-    // 引入极光基础 SDK (使用 5.5.3 版本)
-    implementation("cn.jiguang.sdk:jpush:5.5.3")
-    implementation(files("libs/HiPushSDK-8.0.12.307.aar"))
-    // 二维码生成和扫描库 (ZXing)
-    implementation("com.journeyapps:zxing-android-embedded:4.3.0")
-    // 协程 (用于异步处理)
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
-    // OkHttp网络请求库
-    implementation("com.squareup.okhttp3:okhttp:4.12.0")
-    // Gson JSON 解析库
-    implementation("com.google.code.gson:gson:2.10.1")
-    // SwipeRefreshLayout 下拉刷新库
-    implementation("androidx.swiperefreshlayout:swiperefreshlayout:1.1.0")
+    
+    implementation(libs.jpush)
+    implementation(libs.zxing.android.embedded)
+    implementation(libs.kotlinx.coroutines.android)
+    implementation(libs.okhttp)
+    implementation(libs.gson)
+    implementation(libs.androidx.swiperefreshlayout)
+    implementation(libs.mpandroidchart)
 
+    // 本地 AAR 保持不变
+    implementation(files("libs/HiPushSDK-8.0.12.307.aar"))
 }
