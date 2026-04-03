@@ -219,7 +219,7 @@ class MainActivity : AppCompatActivity() {
                 R.id.nav_wechat -> { switchFragment(WebListFragment()); true }
                 R.id.nav_monitor -> { switchFragment(MonitorFragment()); true }
                 R.id.nav_file -> { switchFragment(FileCenterFragment()); true }
-                R.id.nav_config -> true
+                R.id.nav_config -> { switchFragment(ConfigFragment()); true }
                 else -> false
             }
         }

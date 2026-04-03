@@ -15,7 +15,6 @@ import androidx.core.content.FileProvider
 import androidx.core.net.toUri
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
-import com.google.android.material.textfield.TextInputLayout
 import com.google.zxing.BarcodeFormat
 import com.journeyapps.barcodescanner.BarcodeEncoder
 import com.journeyapps.barcodescanner.ScanContract
@@ -27,15 +26,16 @@ import java.util.*
 import javax.crypto.Cipher
 import javax.crypto.spec.IvParameterSpec
 import javax.crypto.spec.SecretKeySpec
+import com.google.android.material.textfield.TextInputLayout
 
 class QrGeneratorFragment : Fragment() {
 
     private var selectedDate = ""
     private var currentQrBitmap: Bitmap? = null
-
-    // 🌟 修复 Warning 68: 将变量提为成员变量或在需要时查找
+    private lateinit var authService: AuthService
     private var tvDecodeResult: TextView? = null
 
+    // 扫码回调处理
     private val barcodeLauncher = registerForActivityResult(ScanContract()) { result ->
         if (result.contents != null) {
             view?.findViewById<EditText>(R.id.et_url_to_decrypt)?.setText(result.contents)
@@ -50,8 +50,9 @@ class QrGeneratorFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         val root = inflater.inflate(R.layout.fragment_qr_generator, container, false)
+        authService = AuthService(requireContext())
 
-        val scrollView = root.findViewById<ScrollView>(R.id.scroll_view_qr) ?: (root as? ScrollView)
+        val scrollView = root.findViewById<ScrollView>(R.id.scroll_view_qr)
         val etAccession = root.findViewById<EditText>(R.id.et_accession)
         val etHsCode = root.findViewById<EditText>(R.id.et_hscode)
         val etKey = root.findViewById<EditText>(R.id.et_key)
@@ -66,40 +67,14 @@ class QrGeneratorFragment : Fragment() {
         val btnParse = root.findViewById<Button>(R.id.btn_parse)
         val etUrlToDecrypt = root.findViewById<EditText>(R.id.et_url_to_decrypt)
 
-        // 初始化成员变量
-        tvDecodeResult = root.findViewById(R.id.tv_decode_result)
-
         val tilQuickFill = root.findViewById<TextInputLayout>(R.id.til_quick_fill)
         val actvQuickFill = root.findViewById<AutoCompleteTextView>(R.id.actv_quick_fill)
 
-        // 1. 快速填充逻辑
-        val authService = AuthService(requireContext())
-        if (authService.isLoggedIn()) {
-            lifecycleScope.launch {
-                try {
-                    val configs = authService.getQrConfigs()
-                    if (configs.isNotEmpty()) {
-                        tilQuickFill?.visibility = View.VISIBLE
-                        val names = configs.map { it.hospitalName ?: "未知配置" }
-                        val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_dropdown_item_1line, names)
-                        actvQuickFill?.setAdapter(adapter)
+        tvDecodeResult = root.findViewById(R.id.tv_decode_result)
 
-                        actvQuickFill?.setOnItemClickListener { _: AdapterView<*>, _: View, position: Int, _: Long ->
-                            val selected = configs[position]
-                            etHsCode?.setText(selected.hsCode)
-                            etKey?.setText(selected.aesKey ?: "")
-                            etIv?.setText(selected.aesIv ?: "")
-                        }
-                    } else {
-                        tilQuickFill?.visibility = View.GONE
-                    }
-                } catch (_: Exception) { // 🌟 修复 Warning 155: 使用 _ 忽略未使用的异常
-                    Log.e("FeituQR", "Config error")
-                }
-            }
-        } else {
-            tilQuickFill?.visibility = View.GONE
-        }
+        // 加载并设置“加密参数”快速填充
+        setupQuickFill(tilQuickFill, actvQuickFill, etHsCode, etKey, etIv)
+
 
         // 2. 日期选择
         var lastClickTime: Long = 0
@@ -219,6 +194,56 @@ class QrGeneratorFragment : Fragment() {
         }
 
         return root
+    }
+
+    private fun setupQuickFill(
+        til: TextInputLayout?,
+        actv: AutoCompleteTextView?,
+        etHs: EditText,
+        etKey: EditText,
+        etIv: EditText
+    ) {
+        if (til == null || actv == null) return
+
+        viewLifecycleOwner.lifecycleScope.launch {
+            if (!authService.isLoggedIn()) {
+                til.visibility = View.GONE
+                return@launch
+            }
+
+            try {
+                // 1. 获取所有参数
+                val allParams = authService.getEncryptionParams()
+
+                // 🌟 2. 过滤：二维码界面要求 aesKey 和 aesIv 必须都有值
+                val filteredList = allParams.filter {
+                    it.aesKey.isNotBlank() && it.aesIv.isNotBlank()
+                }
+
+                if (filteredList.isNotEmpty()) {
+                    til.visibility = View.VISIBLE
+                    val names = filteredList.map { it.hospitalName }
+                    val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_dropdown_item_1line, names)
+                    actv.setAdapter(adapter)
+
+                    actv.setOnClickListener { actv.showDropDown() }
+
+                    actv.setOnItemClickListener { _, _, position, _ ->
+                        val selected = filteredList[position]
+                        etHs.setText(selected.hscod)
+                        etKey.setText(selected.aesKey)
+                        etIv.setText(selected.aesIv)
+                        Toast.makeText(context, "已快速填充: ${selected.hospitalName}", Toast.LENGTH_SHORT).show()
+                    }
+                } else {
+                    // 如果过滤后没有符合条件的配置，则隐藏快速填充入口
+                    til.visibility = View.GONE
+                }
+            } catch (e: Exception) {
+                Log.e("QrGenerator", "加载加密参数失败", e)
+                til.visibility = View.GONE
+            }
+        }
     }
 
     override fun onResume() {

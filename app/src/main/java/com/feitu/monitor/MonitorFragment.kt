@@ -70,9 +70,17 @@ class MonitorFragment : Fragment(R.layout.fragment_monitor), OnMessageReceivedLi
 
     private fun startAutoConnection(manager: MonitorWebSocketManager) {
         onStateChange("正在连接...")
-        manager.connect("wss://yy.qiu.ink:7122/ws-monitor")
-    }
 
+        // 🌟 1. 获取本地存储的 Token
+        val authService = AuthService(requireContext())
+        val token = authService.getToken()
+
+        // 🌟 2. 拼接 Token 到 WSS URL 中
+        val wssUrl = "wss://yy.qiu.ink:7122/ws-monitor?token=$token"
+
+        Log.d("MonitorUI", "🚀 正在使用 Token 建立 WSS 连接")
+        manager.connect(wssUrl)
+    }
     override fun onStateChange(state: String) {
         activity?.runOnUiThread {
             if (!isAdded || isDetached) return@runOnUiThread

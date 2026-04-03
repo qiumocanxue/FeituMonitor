@@ -25,6 +25,7 @@ class WebListFragment : Fragment(R.layout.fragment_web_list) {
     private lateinit var accessSecretEt: EditText
     private lateinit var queryValueEt: EditText
     private lateinit var webView: WebView
+    private lateinit var authService: AuthService
 
     private var selectedQueryKey = "patNo"
     private var generatedUrl = ""
@@ -32,7 +33,8 @@ class WebListFragment : Fragment(R.layout.fragment_web_list) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // 🌟 1. 修复状态栏适配：弃用 getIdentifier，改用 WindowInsets
+        authService = AuthService(requireContext())
+
         val statusBarSpacer = view.findViewById<View>(R.id.status_bar_spacer)
         ViewCompat.setOnApplyWindowInsetsListener(view) { _, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
@@ -43,7 +45,7 @@ class WebListFragment : Fragment(R.layout.fragment_web_list) {
             insets
         }
 
-        // 2. 初始化 View
+        // 初始化 View
         hsCodeEt = view.findViewById(R.id.et_hs_code)
         accessKeyEt = view.findViewById(R.id.et_access_key)
         accessSecretEt = view.findViewById(R.id.et_access_secret)
@@ -57,7 +59,8 @@ class WebListFragment : Fragment(R.layout.fragment_web_list) {
         view.findViewById<Button>(R.id.btn_copy).setOnClickListener { copyToClipboard() }
         view.findViewById<Button>(R.id.btn_browser).setOnClickListener { openInBrowser() }
 
-        loadConfigs(view)
+        setupQuickFill(view)
+
     }
 
     override fun onResume() {
@@ -86,6 +89,50 @@ class WebListFragment : Fragment(R.layout.fragment_web_list) {
                 R.id.rb_patIcCard -> "patIcCard"
                 R.id.rb_hisId2 -> "hisId2"
                 else -> "patNo"
+            }
+        }
+    }
+
+    private fun setupQuickFill(view: View) {
+        val cardQuickFill = view.findViewById<View>(R.id.card_quick_fill)
+        val actv = view.findViewById<AutoCompleteTextView>(R.id.spinner_configs)
+
+        if (!authService.isLoggedIn()) {
+            cardQuickFill?.visibility = View.GONE
+            return
+        }
+
+        viewLifecycleOwner.lifecycleScope.launch {
+            try {
+                val allParams = authService.getEncryptionParams()
+
+                // 🌟 核心：按需过滤 (公众号需要 Access 接口配置)
+                val filteredList = allParams.filter {
+                    it.accessKey.isNotBlank() && it.accessSecret.isNotBlank()
+                }
+
+                if (filteredList.isNotEmpty()) {
+                    cardQuickFill?.visibility = View.VISIBLE
+                    val names = filteredList.map { it.hospitalName }
+                    val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_dropdown_item_1line, names)
+                    actv.setAdapter(adapter)
+
+                    // 点击即显示下拉
+                    actv.setOnClickListener { actv.showDropDown() }
+
+                    actv.setOnItemClickListener { _, _, position, _ ->
+                        val selected = filteredList[position]
+                        hsCodeEt.setText(selected.hscod)
+                        accessKeyEt.setText(selected.accessKey)
+                        accessSecretEt.setText(selected.accessSecret)
+                        Toast.makeText(requireContext(), "已同步: ${selected.hospitalName}", Toast.LENGTH_SHORT).show()
+                    }
+                } else {
+                    cardQuickFill?.visibility = View.GONE
+                }
+            } catch (e: Exception) {
+                Log.e("WebListFragment", "setupQuickFill failed", e)
+                cardQuickFill?.visibility = View.GONE
             }
         }
     }
@@ -128,40 +175,6 @@ class WebListFragment : Fragment(R.layout.fragment_web_list) {
         webView.loadUrl(generatedUrl)
     }
 
-    private fun loadConfigs(view: View) {
-        val cardQuickFill = view.findViewById<View>(R.id.card_quick_fill)
-        val autoCompleteTextView = view.findViewById<AutoCompleteTextView>(R.id.spinner_configs)
-        val authService = AuthService(requireContext())
-
-        if (!authService.isLoggedIn()) {
-            cardQuickFill?.visibility = View.GONE
-            return
-        }
-
-        lifecycleScope.launch {
-            try {
-                val configs = authService.getOaConfigs()
-                if (configs.isNotEmpty()) {
-                    cardQuickFill?.visibility = View.VISIBLE
-                    val names = configs.map { it.hospitalName ?: "未知医院" }
-                    val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_dropdown_item_1line, names)
-                    autoCompleteTextView.setAdapter(adapter)
-
-                    autoCompleteTextView.setOnItemClickListener { _, _, position, _ ->
-                        val selected = configs[position]
-                        hsCodeEt.setText(selected.hsCode ?: "")
-                        accessKeyEt.setText(selected.accessKey ?: "")
-                        accessSecretEt.setText(selected.accessSecret ?: "")
-                    }
-                } else {
-                    cardQuickFill?.visibility = View.GONE
-                }
-            } catch (e: Exception) {
-                Log.e("FeituWeb", "加载配置失败: ${e.message}") // 这样 e 就被使用了，警告也会消失
-                cardQuickFill?.visibility = View.GONE
-            }
-        }
-    }
 
     private fun md5(content: String): String {
         val hash = MessageDigest.getInstance("MD5").digest(content.toByteArray())

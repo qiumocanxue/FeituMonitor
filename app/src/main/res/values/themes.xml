@@ -23,4 +23,10 @@
         <item name="android:textColor">@color/feitu_blue</item>
         <item name="android:textStyle">bold</item>
     </style>
+
+    <style name="FeituDialogTheme" parent="Theme.MaterialComponents.DayNight.Dialog.Alert">
+        <item name="colorPrimary">@color/feitu_blue</item>
+        <item name="colorAccent">@color/feitu_blue</item>
+    </style>
+
 </resources>

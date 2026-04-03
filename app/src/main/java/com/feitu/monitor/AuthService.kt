@@ -8,25 +8,68 @@ import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import okhttp3.FormBody
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.Response
 import org.json.JSONObject
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.RequestBody.Companion.toRequestBody
+import android.annotation.SuppressLint
+
+import java.security.SecureRandom
+import java.security.cert.X509Certificate
+import javax.net.ssl.SSLContext
+import javax.net.ssl.TrustManager
+import javax.net.ssl.X509TrustManager
+import okhttp3.Protocol
 
 class AuthService(context: Context) {
 
     companion object {
-        // ⚠️ 局域网调试请使用具体 IP，模拟器使用 10.0.2.2
-        const val BASE_URL = "https://yy.qiu.ink"
+        const val BASE_URL = "https://nyy.qiu.ink:7122"
     }
 
     // 全局复用一个 OkHttpClient 实例以提升性能
-    private val client = OkHttpClient()
+    private val client = createUnsafeOkHttpClient()
     private val gson = Gson()
 
     // 快捷获取 SharedPreferences
     private val prefs = context.getSharedPreferences("feitu_prefs", Context.MODE_PRIVATE)
+
+    private fun createUnsafeOkHttpClient(): OkHttpClient {
+        try {
+            // 创建一个不检查证书的信任管理器
+            val trustAllCerts = arrayOf<TrustManager>(
+                @SuppressLint("CustomX509TrustManager")
+                object : X509TrustManager {
+                    @SuppressLint("TrustAllX509TrustManager")
+                    override fun checkClientTrusted(
+                        chain: Array<X509Certificate>,
+                        authType: String
+                    ) {
+                    }
+
+                    @SuppressLint("TrustAllX509TrustManager")
+                    override fun checkServerTrusted(
+                        chain: Array<X509Certificate>,
+                        authType: String
+                    ) {
+                    }
+
+                    override fun getAcceptedIssuers(): Array<X509Certificate> = arrayOf()
+                })
+
+            val sslContext = SSLContext.getInstance("SSL")
+            sslContext.init(null, trustAllCerts, SecureRandom())
+
+            return OkHttpClient.Builder()
+                .sslSocketFactory(sslContext.socketFactory, trustAllCerts[0] as X509TrustManager)
+                .hostnameVerifier { _, _ -> true } // 🌟 忽略域名匹配检查
+                .build()
+        } catch (e: Exception) {
+            throw RuntimeException(e)
+        }
+    }
 
     /**
      * 登录方法
@@ -35,41 +78,45 @@ class AuthService(context: Context) {
      */
     suspend fun login(username: String, password: String): LoginResult =
         withContext(Dispatchers.IO) {
-            val url = "$BASE_URL/token"
+            val url = "$BASE_URL/api/login"
 
             try {
-                val formBody = FormBody.Builder()
-                    .add("username", username)
-                    .add("password", password)
-                    .build()
+                val jsonParam = JSONObject().apply {
+                    put("Username", username)
+                    put("Password", password)
+                }.toString()
+
+                // 🌟 修复编译错误：使用字符串的扩展函数 toMediaTypeOrNull()
+                val mediaType = "application/json; charset=utf-8".toMediaTypeOrNull()
+
+                // 🌟 修复建议：RequestBody.create 也建议改为扩展函数写法
+                val requestBody = jsonParam.toRequestBody(mediaType)
 
                 val request = Request.Builder()
                     .url(url)
-                    .post(formBody)
+                    .post(requestBody)
                     .build()
 
                 client.newCall(request).execute().use { response ->
+                    // ... 后续逻辑保持不变
                     val responseString = response.body?.string() ?: "{}"
                     val jsonObject = JSONObject(responseString)
 
-                    if (response.isSuccessful) {
-                        val token = jsonObject.getString("access_token")
-
-                        // 🌟 修复 2：使用 KTX 扩展写法，无需手动写 apply()
+                    if (response.isSuccessful && jsonObject.optBoolean("success")) {
+                        val token = jsonObject.getString("token")
                         prefs.edit {
                             putString("jwt_token", token)
                             putString("username", username)
                         }
-
-                        return@withContext LoginResult(true, "登录成功")
+                        return@withContext LoginResult(true, jsonObject.optString("message", "登录成功"))
                     } else {
-                        val errorDetail = jsonObject.optString("detail", "登录失败")
-                        return@withContext LoginResult(false, if (response.code == 429) "⛔ $errorDetail" else "❌ $errorDetail")
+                        val errorDetail = jsonObject.optString("message", "登录失败")
+                        return@withContext LoginResult(false, errorDetail)
                     }
                 }
             } catch (e: Exception) {
                 Log.e("AuthService", "登录异常", e)
-                return@withContext LoginResult(false, "⚠️ 网络连接错误，请检查服务器")
+                return@withContext LoginResult(false, "⚠️ 网络连接错误")
             }
         }
 
@@ -123,71 +170,75 @@ class AuthService(context: Context) {
         }
     }
 
-    // --- 获取二维码配置列表 ---
-    suspend fun getQrConfigs(): List<QrConfig> = withContext(Dispatchers.IO) {
+    /**
+     * 🌟 新增：用于解析后端返回的 {"success": true, "message": "..."}
+     */
+    data class ApiResponse(val success: Boolean, val message: String?)
+
+    /**
+     * 1. 获取全部配置列表 (GET) - 路径更新为 /list
+     */
+    suspend fun getEncryptionParams(): List<EncryptionParams> = withContext(Dispatchers.IO) {
         val token = getToken() ?: return@withContext emptyList()
-        val url = "$BASE_URL/api/config/qr"
+        val url = "$BASE_URL/api/encryption-params/list?token=$token" // 🌟 路径已更新
+
+        Log.d("FeituAPI", "🚀 [加载列表] URL: $url")
 
         try {
-            val request = Request.Builder()
-                .url(url)
-                .header("Authorization", "Bearer $token")
-                .get()
-                .build()
-
+            val request = Request.Builder().url(url).get().build()
             client.newCall(request).execute().use { response ->
                 if (response.isSuccessful) {
-                    val responseString = response.body?.string() ?: "[]"
-                    Log.e("FeituJSON", "后台返回的配置数据是: $responseString")
-
-                    // 🌟 使用 Gson 解析 Json Array 为 List<QrConfig>
-                    val listType = object : TypeToken<List<QrConfig>>() {}.type
-                    return@withContext gson.fromJson(responseString, listType)
-                } else {
-                    Log.e("AuthService", "获取QR配置失败: ${response.code}")
-                    return@withContext emptyList()
+                    val json = response.body?.string() ?: "[]"
+                    val type = object : TypeToken<List<EncryptionParams>>() {}.type
+                    return@withContext gson.fromJson<List<EncryptionParams>>(json, type)
                 }
             }
         } catch (e: Exception) {
-            Log.e("AuthService", "网络异常", e)
-            return@withContext emptyList()
+            Log.e("FeituAPI", "💥 获取列表失败", e)
+        }
+        return@withContext emptyList()
+    }
+
+    /**
+     * 2. 保存或修改配置 (POST)
+     */
+    suspend fun saveEncryptionParams(params: EncryptionParams): Boolean = withContext(Dispatchers.IO) {
+        val token = getToken() ?: return@withContext false
+        val url = "$BASE_URL/api/encryption-params?token=$token"
+
+        try {
+            val json = gson.toJson(params)
+            val body = json.toRequestBody("application/json; charset=utf-8".toMediaTypeOrNull())
+            val request = Request.Builder().url(url).post(body).build()
+
+            client.newCall(request).execute().use { response ->
+                val responseString = response.body?.string() ?: ""
+                Log.d("FeituAPI", "📥 [保存返回]: $responseString")
+                val apiRes = gson.fromJson(responseString, ApiResponse::class.java)
+                return@withContext apiRes?.success ?: false
+            }
+        } catch (e: Exception) {
+            false
         }
     }
 
-    // --- 获取公众号配置列表 ---
-    suspend fun getOaConfigs(): List<OaConfig> = withContext(Dispatchers.IO) {
-        val token = getToken() ?: return@withContext emptyList()
-        val url = "$BASE_URL/api/config/oa"
-
-        // 🌟 打印：请求地址和 Token
-        Log.d("FeituAPI", "🚀 [OA配置请求] 开始请求: $url")
-        Log.d("FeituAPI", "🔑 [Auth Header]: Bearer $token")
-
-        val request = Request.Builder()
-            .url(url)
-            .addHeader("Authorization", "Bearer $token")
-            .build()
+    /**
+     * 3. 删除某条配置 (DELETE)
+     */
+    suspend fun deleteEncryptionParam(id: Int): Boolean = withContext(Dispatchers.IO) {
+        val token = getToken() ?: return@withContext false
+        val url = "$BASE_URL/api/encryption-params/$id?token=$token"
 
         try {
+            val request = Request.Builder().url(url).delete().build()
             client.newCall(request).execute().use { response ->
-                // 🌟 打印：响应状态码
-                Log.d("FeituAPI", "📡 [OA响应状态]: ${response.code}")
-
-                if (response.isSuccessful) {
-                    val json = response.body?.string() ?: "[]"
-
-                    // 🌟 打印：最关键的原始 JSON
-                    Log.d("FeituAPI", "📥 [OA原始数据]: $json")
-
-                    val type = object : TypeToken<List<OaConfig>>() {}.type
-                    return@withContext Gson().fromJson(json, type)
-                } else {
-                    Log.e("FeituAPI", "❌ OA请求失败: ${response.message}")
-                }
+                val responseString = response.body?.string() ?: ""
+                Log.d("FeituAPI", "📥 [删除返回]: $responseString")
+                val apiRes = gson.fromJson(responseString, ApiResponse::class.java)
+                return@withContext apiRes?.success ?: false
             }
         } catch (e: Exception) {
-            Log.e("FeituAPI", "💥 OA请求异常: ${e.message}")
+            false
         }
-        return@withContext emptyList()
     }
 }

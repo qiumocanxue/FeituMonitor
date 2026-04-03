@@ -75,6 +75,12 @@
             android:theme="@style/Theme.AppCompat.Light.NoActionBar"
             android:configChanges="orientation|screenSize|screenLayout|smallestScreenSize" />
 
+        <activity
+            android:name=".CryptoParamsActivity"
+            android:exported="false"
+            android:label="加密参数管理"
+            android:theme="@style/Theme.MaterialComponents.DayNight.NoActionBar" />
+
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="${applicationId}.file provider"
