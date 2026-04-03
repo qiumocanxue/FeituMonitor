@@ -37,7 +37,7 @@ class AgentControlActivity : AppCompatActivity(), OnMessageReceivedListener {
         setupMenuIcons()
 
         MonitorFragment.getWssManager(this)?.let {
-            it.listener = this
+            it.addListener(this)
             if (it.isConnected) {
                 appendLog("监控链路已就绪")
             } else {
@@ -162,6 +162,6 @@ class AgentControlActivity : AppCompatActivity(), OnMessageReceivedListener {
 
     override fun onDestroy() {
         super.onDestroy()
-        MonitorFragment.getWssManager(this)?.listener = null
+        MonitorFragment.getWssManager(this)?.removeListener(this)
     }
 }

@@ -59,10 +59,8 @@ class MonitorFragment : Fragment(R.layout.fragment_monitor), OnMessageReceivedLi
 
         val manager = getWssManager(requireContext())
         manager?.let {
-            it.listener = this
-            if (it.isConnected) {
-                onStateChange("已连接")
-            } else {
+            it.addListener(this)
+            if (!it.isConnected) {
                 startAutoConnection(it)
             }
         }
@@ -134,6 +132,7 @@ class MonitorFragment : Fragment(R.layout.fragment_monitor), OnMessageReceivedLi
 
     override fun onDestroyView() {
         super.onDestroyView()
-        getWssManager(requireContext())?.listener = null
+        // 仅移除自己的监听，不破坏整个链路
+        getWssManager(requireContext())?.removeListener(this)
     }
 }
