@@ -31,7 +31,7 @@ class PerfTrendsActivity : AppCompatActivity(), OnMessageReceivedListener {
         setupChartStyle()
 
         MonitorFragment.getWssManager(this)?.let {
-            it.listener = this
+            it.addListener(this)
             Log.i("PerfTrends", "历史数据分析链路已就绪")
         }
     }
@@ -155,6 +155,6 @@ class PerfTrendsActivity : AppCompatActivity(), OnMessageReceivedListener {
 
     override fun onDestroy() {
         super.onDestroy()
-        MonitorFragment.getWssManager(this)?.listener = null
+        MonitorFragment.getWssManager(this)?.removeListener(this)
     }
 }

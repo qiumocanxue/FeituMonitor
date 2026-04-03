@@ -12,16 +12,31 @@ import java.util.*
 import java.util.concurrent.TimeUnit
 import javax.net.ssl.*
 import android.annotation.SuppressLint
+import java.util.concurrent.CopyOnWriteArraySet
 
 class MonitorWebSocketManager(private val context: Context) {
 
     private val client: OkHttpClient by lazy { createOkHttpClient() }
     private var webSocket: WebSocket? = null
     private val gson = Gson()
-    var listener: OnMessageReceivedListener? = null
+//    var listener: OnMessageReceivedListener? = null.
+//    多监听器集合
+    private val listeners = CopyOnWriteArraySet<OnMessageReceivedListener>()
 
     var isConnected: Boolean = false
         private set
+
+    fun addListener(listener: OnMessageReceivedListener) {
+        listeners.add(listener)
+        // 如果加入时底层已经连接，立即同步状态给新页面
+        if (isConnected) {
+            listener.onStateChange("已连接")
+        }
+    }
+
+    fun removeListener(listener: OnMessageReceivedListener) {
+        listeners.remove(listener)
+    }
 
     // 测试方法，上线要改
     @SuppressLint("CustomX509TrustManager", "BadHostnameVerifier")
@@ -59,7 +74,7 @@ class MonitorWebSocketManager(private val context: Context) {
         webSocket = client.newWebSocket(request, object : WebSocketListener() {
             override fun onOpen(webSocket: WebSocket, response: Response) {
                 isConnected = true
-                listener?.onStateChange("已连接")
+                listeners.forEach { it.onStateChange("已连接") }
 
                 val currentUsername = AuthService(context).getUserName()
                 sendEnvelope(
@@ -72,25 +87,26 @@ class MonitorWebSocketManager(private val context: Context) {
 
             override fun onMessage(webSocket: WebSocket, text: String) {
                 try {
-                    Log.d("WSS_RECEIVE", "原始数据: $text")
                     val envelope = gson.fromJson(text, MessageEnvelope::class.java)
-                    listener?.onNewMessage(envelope)
+                    // 🌟 循环分发最新数据给所有页面
+                    listeners.forEach { it.onNewMessage(envelope) }
                 } catch (e: Exception) {
-                    // 🌟 修复警告 1：在 Log 中使用 e，解析失败时能看到具体原因
                     Log.e("WSS", "解析失败: $text", e)
                 }
             }
 
             override fun onFailure(webSocket: WebSocket, t: Throwable, response: Response?) {
                 isConnected = false
-                listener?.onStateChange("连接断开")
-                listener?.onError(t.message ?: "未知错误")
+                listeners.forEach {
+                    it.onStateChange("连接断开")
+                    it.onError(t.message ?: "未知错误")
+                }
             }
 
             override fun onClosing(webSocket: WebSocket, code: Int, reason: String) {
                 webSocket.close(1000, null)
                 isConnected = false
-                listener?.onStateChange("正在关闭")
+                listeners.forEach { it.onStateChange("正在关闭") }
             }
 
             override fun onClosed(webSocket: WebSocket, code: Int, reason: String) {
