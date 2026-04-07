@@ -20,6 +20,12 @@ class ConfigFragment : Fragment(R.layout.fragment_config) {
             startActivity(intent)
         }
 
+        // ConfigFragment.kt
+
+        view.findViewById<View>(R.id.card_register_user).setOnClickListener {
+            startActivity(Intent(requireContext(), RegisterUserActivity::class.java))
+        }
+
         // 此处可以继续添加其他功能的点击事件
     }
 

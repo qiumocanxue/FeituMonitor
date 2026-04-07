@@ -81,6 +81,18 @@
             android:label="加密参数管理"
             android:theme="@style/Theme.MaterialComponents.DayNight.NoActionBar" />
 
+        <activity
+            android:name=".RegisterUserActivity"
+            android:exported="false"
+            android:label="用户注册"
+            android:theme="@style/Theme.MaterialComponents.DayNight.NoActionBar" />
+
+        <activity
+            android:name=".AgentFileActivity"
+            android:exported="false"
+            android:label="文件管理"
+            android:theme="@style/Theme.MaterialComponents.DayNight.NoActionBar" />
+
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="${applicationId}.file provider"

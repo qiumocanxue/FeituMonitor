@@ -23,6 +23,8 @@ import javax.net.ssl.TrustManager
 import javax.net.ssl.X509TrustManager
 import okhttp3.Protocol
 
+data class ApiResponse(val success: Boolean, val message: String?)
+
 class AuthService(context: Context) {
 
     companion object {
@@ -98,7 +100,6 @@ class AuthService(context: Context) {
                     .build()
 
                 client.newCall(request).execute().use { response ->
-                    // ... 后续逻辑保持不变
                     val responseString = response.body?.string() ?: "{}"
                     val jsonObject = JSONObject(responseString)
 
@@ -119,6 +120,95 @@ class AuthService(context: Context) {
                 return@withContext LoginResult(false, "⚠️ 网络连接错误")
             }
         }
+
+    suspend fun registerUser(username: String, password: String): ApiResponse = withContext(Dispatchers.IO) {
+        val token = getToken() ?: return@withContext ApiResponse(false, "未登录或 Token 已失效")
+        val url = "$BASE_URL/api/register?token=$token"
+
+        try {
+            val json = JSONObject().apply {
+                put("Username", username)
+                put("Password", password)
+            }.toString()
+
+            val body = json.toRequestBody("application/json; charset=utf-8".toMediaTypeOrNull())
+            val request = Request.Builder().url(url).post(body).build()
+
+            client.newCall(request).execute().use { response ->
+                val responseString = response.body?.string() ?: ""
+                Log.d("FeituAPI", "📤 [注册提交] 状态: ${response.code}, 返回: $responseString")
+
+                if (response.code == 401) {
+                    return@withContext ApiResponse(false, "权限不足或 Token 无效")
+                }
+
+                return@withContext gson.fromJson(responseString, ApiResponse::class.java)
+            }
+        } catch (e: Exception) {
+            Log.e("FeituAPI", "💥 [注册提交] 异常: ${e.message}")
+            ApiResponse(false, "网络连接失败")
+        }
+    }
+
+    /**
+     * 方法 A：发送指令并返回原始字符串 (用于获取文件列表)
+     * 因为文件列表需要复杂的 Json 解析，所以我们直接返回 String
+     */
+    suspend fun sendFileCommandRaw(toAgentId: String, action: String, path: String, base64: String? = null): String? = withContext(Dispatchers.IO) {
+        val token = getToken()
+        if (token == null) {
+            Log.e("FeituAPI", "❌ [文件指令] 发送失败: Token 为空，请重新登录")
+            return@withContext null
+        }
+
+        // 🌟 确认这里的路径是否真的是 /api/command？
+        // 如果后端是用 WebSocket 转发的，可能不需要这个 POST 接口
+        val url = "$BASE_URL/api/command?token=$token"
+
+        try {
+            val command = FileCommand(
+                From = "Android_Qiumo", // 建议先硬编码测试
+                To = toAgentId,
+                Payload = FilePayload(action, path, base64)
+            )
+
+            val json = gson.toJson(command)
+            Log.d("FeituAPI", "🚀 [文件指令] 准备请求 URL: $url")
+            Log.d("FeituAPI", "📝 [文件指令] 发送 JSON: $json")
+
+            val body = json.toRequestBody("application/json; charset=utf-8".toMediaTypeOrNull())
+            val request = Request.Builder().url(url).post(body).build()
+
+            client.newCall(request).execute().use { response ->
+                val resBody = response.body?.string()
+                Log.d("FeituAPI", "📡 [文件指令] 响应状态码: ${response.code}")
+                Log.d("FeituAPI", "📥 [文件指令] 原始返回: $resBody")
+                return@withContext resBody
+            }
+        } catch (e: Exception) {
+            Log.e("FeituAPI", "💥 [文件指令] 网络异常: ${e.message}")
+            null
+        }
+    }
+
+    /**
+     * 方法 B：发送指令并返回 ApiResponse 对象 (用于删除、上传等简单操作)
+     * 对应你报错中找不到的那个 'sendFileCommand'
+     */
+    suspend fun sendFileCommand(toAgentId: String, action: String, path: String, base64: String? = null): ApiResponse = withContext(Dispatchers.IO) {
+        // 复用上面的 Raw 方法拿到结果
+        val raw = sendFileCommandRaw(toAgentId, action, path, base64)
+
+        if (raw != null) {
+            try {
+                // 将字符串转为 ApiResponse 对象
+                return@withContext gson.fromJson(raw, ApiResponse::class.java)
+            } catch (e: Exception) {
+                return@withContext ApiResponse(false, "解析响应失败")
+            }
+        }
+        return@withContext ApiResponse(false, "服务器未响应")
+    }
 
     // 检查是否已登录
     fun isLoggedIn(): Boolean = prefs.contains("jwt_token")

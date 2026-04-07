@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.util.Log
 import android.view.View
 import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.graphics.toColorInt
 import androidx.core.view.ViewCompat
@@ -34,6 +35,7 @@ class AgentControlActivity : AppCompatActivity(), OnMessageReceivedListener {
         agentAlias = intent.getStringExtra("AGENT_ALIAS") ?: "未知设备"
 
         initUI()
+        // 🌟 统一配置所有菜单项
         setupMenuIcons()
 
         MonitorFragment.getWssManager(this)?.let {
@@ -47,9 +49,11 @@ class AgentControlActivity : AppCompatActivity(), OnMessageReceivedListener {
     }
 
     private fun initUI() {
+        // 设置标题和返回键
         findViewById<TextView>(R.id.tv_toolbar_title).text = agentAlias
         findViewById<View>(R.id.btn_back_custom).setOnClickListener { finish() }
 
+        // 沉浸式状态栏适配
         val toolbar = findViewById<View>(R.id.toolbar)
         ViewCompat.setOnApplyWindowInsetsListener(toolbar) { view, insets ->
             val statusBar = insets.getInsets(WindowInsetsCompat.Type.statusBars())
@@ -57,6 +61,7 @@ class AgentControlActivity : AppCompatActivity(), OnMessageReceivedListener {
             insets
         }
 
+        // 初始化进度条和文本
         progressCpu = findViewById(R.id.progress_cpu)
         progressRam = findViewById(R.id.progress_ram)
         tvCpuLabel = findViewById(R.id.tv_cpu_label)
@@ -66,8 +71,15 @@ class AgentControlActivity : AppCompatActivity(), OnMessageReceivedListener {
         val d = resources.displayMetrics.density
         setupGauge(progressCpu, "#FF5252", d)
         setupGauge(progressRam, "#2196F3", d)
+    }
 
-        findViewById<View>(R.id.btn_perf_trends).setOnClickListener {
+    /**
+     * 🌟 核心重构：在这里统一配置所有的按钮逻辑
+     */
+    private fun setupMenuIcons() {
+        // 1. 性能趋势
+        setMenuItem(R.id.btn_perf_trends, "性能趋势", R.drawable.ic_trending_up) {
+            // 发送历史数据请求
             val request = mapOf(
                 "Type" to "GetHistory",
                 "From" to "MyAndroid",
@@ -76,43 +88,72 @@ class AgentControlActivity : AppCompatActivity(), OnMessageReceivedListener {
             )
             MonitorFragment.getWssManager(this)?.send(Gson().toJson(request))
 
-            val intent = Intent(this, PerfTrendsActivity::class.java).apply {
+            // 跳转页面
+            startActivity(Intent(this, PerfTrendsActivity::class.java).apply {
                 putExtra("AGENT_ID", agentId)
                 putExtra("AGENT_ALIAS", agentAlias)
-            }
-            startActivity(intent)
+            })
+        }
+
+        // 2. 文件管理 (已修复点击响应)
+        setMenuItem(R.id.btn_file_manage, "文件管理", R.drawable.ic_desktop) {
+            startActivity(Intent(this, AgentFileActivity::class.java).apply {
+                putExtra("AGENT_ID", agentId)
+                putExtra("AGENT_ALIAS", agentAlias)
+            })
+        }
+
+        // 3. 远程桌面 (占位)
+        setMenuItem(R.id.btn_remote_desktop, "远程桌面", R.drawable.ic_desktop) {
+            showPendingToast("远程桌面")
+        }
+
+        // 4. 自助打印 (占位)
+        setMenuItem(R.id.btn_print_service, "自助打印", R.drawable.ic_print) {
+            showPendingToast("自助打印")
+        }
+
+        // 5. 故障排查 (占位)
+        setMenuItem(R.id.btn_troubleshoot, "故障排查", R.drawable.ic_build) {
+            showPendingToast("故障排查")
+        }
+
+        // 6. CMD指令 (占位)
+        setMenuItem(R.id.btn_cmd, "CMD指令", R.drawable.ic_terminal) {
+            showPendingToast("CMD指令")
         }
     }
 
     /**
-     * 🌟 修复警告：使用 KTX 扩展函数 .toColorInt()
+     * 🌟 封装后的菜单设置方法，支持传入点击回调
+     */
+    private fun setMenuItem(layoutId: Int, title: String, iconRes: Int, onClick: () -> Unit) {
+        val container = findViewById<View>(layoutId)
+        // 设置图标和文字
+        container.findViewById<android.widget.ImageView>(R.id.menu_icon).setImageResource(iconRes)
+        container.findViewById<TextView>(R.id.menu_text).text = title
+
+        // 绑定点击事件
+        container.setOnClickListener { onClick() }
+    }
+
+    private fun showPendingToast(featureName: String) {
+        Toast.makeText(this, "$featureName 功能正在适配中...", Toast.LENGTH_SHORT).show()
+    }
+
+    /**
+     * 设置圆环进度条样式
      */
     private fun setupGauge(gauge: CircularProgressIndicator, color: String, d: Float) {
         gauge.apply {
             indicatorSize = (64 * d).toInt()
             trackThickness = (6 * d).toInt()
-            // 修复：不再使用 Color.parseColor(color)
             setIndicatorColor(color.toColorInt())
             trackColor = "#F0F0F0".toColorInt()
         }
     }
 
-    private fun setupMenuIcons() {
-        setMenuItem(R.id.btn_perf_trends, "性能趋势", R.drawable.ic_trending_up)
-        setMenuItem(R.id.btn_file_manage, "文件管理", R.drawable.ic_desktop)
-        setMenuItem(R.id.btn_remote_desktop, "远程桌面", R.drawable.ic_desktop)
-        setMenuItem(R.id.btn_print_service, "自助打印", R.drawable.ic_print)
-        setMenuItem(R.id.btn_troubleshoot, "故障排查", R.drawable.ic_build)
-        setMenuItem(R.id.btn_cmd, "CMD指令", R.drawable.ic_terminal)
-    }
-
-    private fun setMenuItem(layoutId: Int, title: String, iconRes: Int) {
-        val container = findViewById<View>(layoutId)
-        val iconView = container.findViewById<android.widget.ImageView>(R.id.menu_icon)
-        iconView.setImageResource(iconRes)
-        val textView = container.findViewById<TextView>(R.id.menu_text)
-        textView.text = title
-    }
+    // --- 消息处理与状态同步逻辑保持不变 ---
 
     override fun onNewMessage(envelope: MessageEnvelope) {
         if (envelope.Type == "Heartbeat" &&
@@ -121,11 +162,6 @@ class AgentControlActivity : AppCompatActivity(), OnMessageReceivedListener {
         }
     }
 
-    /**
-     * 🌟 修复说明：
-     * 1. 使用 getString 配合占位符处理 UI 文本（已在之前的 turn 中部分修复）
-     * 2. 避免在 setText 中直接使用 String.format 或拼接
-     */
     private fun updateRealtimeStats(payload: Any?) {
         try {
             val json = Gson().toJson(payload)
@@ -134,9 +170,6 @@ class AgentControlActivity : AppCompatActivity(), OnMessageReceivedListener {
             progressCpu.setProgress(data.CpuUsage, true)
             progressRam.setProgress(data.RamUsage.toInt(), true)
 
-            // 确保 strings.xml 中定义了：
-            // <string name="cpu_format">CPU %1$d%%</string>
-            // <string name="ram_format">RAM %1$.1f%%</string>
             tvCpuLabel.text = getString(R.string.cpu_format, data.CpuUsage)
             tvRamLabel.text = getString(R.string.ram_format, data.RamUsage)
 
@@ -147,7 +180,6 @@ class AgentControlActivity : AppCompatActivity(), OnMessageReceivedListener {
 
     private fun appendLog(msg: String) {
         val time = SimpleDateFormat("HH:mm:ss", Locale.getDefault()).format(Date())
-        // 日志类拼接通常被允许，但如果 Lint 报错，可考虑使用占位符
         val lines = "[$time] $msg\n${tvMiniLog.text}".lines().take(6)
         tvMiniLog.text = lines.joinToString("\n")
     }
