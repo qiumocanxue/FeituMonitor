@@ -3,7 +3,7 @@ package com.feitu.monitor.models
 import java.util.UUID
 
 /**
- * 远程文件指令协议模型
+ * 1. 远程文件发送指令协议 (手机 -> Server -> Agent)
  */
 data class FileCommand(
     val Type: String = "FileCommand",
@@ -14,24 +14,42 @@ data class FileCommand(
 )
 
 /**
- * 指令具体内容
+ * 指令具体载荷
  */
 data class FilePayload(
     val Action: String,      // 对应 FileAction 中的常量
     val Path: String,        // 远程机器的绝对路径
-    val Base64Data: String? = null // 上传时需要的 Base64 内容
+    val Base64Data: String? = null // 上传或写入时使用的内容
+)
+
+/**
+ * 2. 远程文件响应解析模型 (Agent -> Server -> 手机)
+ * 匹配你日志中 Data 字段的结构
+ */
+data class RemoteDataResponse(
+    val CurrentPath: String?,
+    val SubFolders: List<String>?,
+    val Files: List<RemoteFileItem>?,
+    val Status: String?,
+    val Error: String?
+)
+
+/**
+ * 响应中 Files 列表的具体单项
+ */
+data class RemoteFileItem(
+    val Name: String,
+    val Size: Long,      // 对应日志中的 Size
+    val LastMod: String  // 对应日志中的 LastMod
 )
 
 /**
  * 🌟 指令常量定义
- * 建议使用此对象中的常量，避免手动敲字符串导致拼写错误
  */
 object FileAction {
     const val OPEN = "OpenFile"      // 打开/读取文件内容
     const val DOWNLOAD = "Download"  // 下载文件
     const val UPLOAD = "Upload"      // 上传文件
     const val DELETE = "Delete"      // 删除文件
-
-    // 如果后端支持获取目录列表，通常约定为 ListFiles
-    const val LIST = "ListFiles"
+    const val LIST = "ListFiles"     // 获取目录列表
 }
