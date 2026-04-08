@@ -10,7 +10,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.core.content.FileProvider
 import java.io.File
-import java.util.Locale // 🌟 必须导入
+import java.util.Locale
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -149,7 +149,6 @@ object FtpUtils {
     }
 }
 
-// 🌟 终极预览缓冲管理器
 object FtpCacheManager {
     private const val MAX_CACHE_SIZE = 300L * 1024 * 1024
 

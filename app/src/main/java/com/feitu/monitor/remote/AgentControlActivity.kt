@@ -154,7 +154,7 @@ class AgentControlActivity : AppCompatActivity(), OnMessageReceivedListener {
             indicatorSize = (64 * d).toInt()
             trackThickness = (6 * d).toInt()
             setIndicatorColor(color.toColorInt())
-            trackColor = "#F0F0F0".toColorInt()
+            trackColor = "@color/divider_gray".toColorInt()
         }
     }
 

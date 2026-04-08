@@ -47,7 +47,7 @@
                     android:layout_height="wrap_content"
                     android:text="C:\\"
                     android:textSize="14sp"
-                    android:textColor="#333333"
+                    android:textColor="@color/text_primary"
                     android:singleLine="true"
                     android:ellipsize="start"
                     android:paddingStart="4dp"/>

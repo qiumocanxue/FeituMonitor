@@ -250,49 +250,32 @@ class FileCenterFragment : Fragment() {
     inner class FtpAdapter(private val onClick: (FtpItem) -> Unit) :
         ListAdapter<FtpItem, FtpAdapter.ViewHolder>(FtpDiffCallback()) {
 
-        inner class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-            val ivIcon: ImageView = view.findViewById(android.R.id.icon)
-            val tvName: TextView = view.findViewById(android.R.id.text1)
-            val tvMeta: TextView = view.findViewById(android.R.id.text2)
+        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
+            val view = LayoutInflater.from(parent.context)
+                .inflate(R.layout.item_standard_row, parent, false)
+            return ViewHolder(view)
         }
 
-        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-            val context = parent.context
-            val view = LayoutInflater.from(context).inflate(android.R.layout.simple_list_item_2, parent, false)
-            val root = LinearLayout(context).apply {
-                orientation = LinearLayout.HORIZONTAL
-                setPadding(32, 32, 32, 32)
-                gravity = Gravity.CENTER_VERTICAL
-
-                val icon = ImageView(context).apply {
-                    id = android.R.id.icon
-                    layoutParams = LinearLayout.LayoutParams(80, 80).apply { setMargins(0,0,32,0) }
-                }
-                addView(icon)
-                addView(view)
-            }
-            return ViewHolder(root)
+        inner class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+            val ivIcon: ImageView = view.findViewById(R.id.iv_icon)
+            val tvName: TextView = view.findViewById(R.id.tv_primary)
+            val tvMeta: TextView = view.findViewById(R.id.tv_secondary)
         }
 
         override fun onBindViewHolder(holder: ViewHolder, position: Int) {
             val item = getItem(position)
 
-            holder.tvName.text = item.fileName // 🌟 使用接口属性
-            holder.tvName.textSize = 15f
-            holder.tvName.setTextColor("#333333".toColorInt())
+            // 1. 设置文字内容
+            holder.tvName.text = item.fileName
 
-            // 🌟 使用接口属性简化代码
             holder.tvMeta.text = holder.itemView.context.getString(
                 R.string.ftp_meta_format,
                 item.dateText,
                 item.sizeText
             )
-            holder.tvMeta.textSize = 12f
-            holder.tvMeta.setTextColor("#888888".toColorInt())
 
-            // 🌟 替换为统一逻辑
+            // 2. 设置图标和点击事件
             holder.ivIcon.setImageResource(FileIconUtils.getFileIconRes(item))
-
             holder.itemView.setOnClickListener { onClick(item) }
         }
     }

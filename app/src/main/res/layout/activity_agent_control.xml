@@ -11,7 +11,7 @@
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
-        android:background="#FFFFFF"
+        android:background="@color/white"
         app:contentInsetStart="0dp">
         <RelativeLayout android:layout_width="match_parent" android:layout_height="wrap_content">
             <ImageView
@@ -26,7 +26,7 @@
                 android:layout_centerInParent="true"
                 android:text="@string/toolbar_control_center"
                 android:textSize="18sp"
-                android:textStyle="bold" android:textColor="#333333" />
+                android:textStyle="bold" android:textColor="@color/text_primary" />
         </RelativeLayout>
     </androidx.appcompat.widget.Toolbar>
 
@@ -100,7 +100,7 @@
                 android:layout_marginTop="24dp"
                 android:layout_marginBottom="12dp"
                 android:text="@string/title_manage_tools"
-                android:textColor="#999999"
+                android:textColor="@color/text_secondary"
                 android:textStyle="bold" />
 
             <GridLayout
@@ -121,7 +121,7 @@
                 android:layout_marginTop="24dp"
                 android:layout_marginBottom="12dp"
                 android:text="@string/title_recent_events"
-                android:textColor="#999999"
+                android:textColor="@color/text_secondary"
                 android:textStyle="bold" />
 
             <androidx.cardview.widget.CardView

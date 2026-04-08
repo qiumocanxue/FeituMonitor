@@ -24,10 +24,10 @@
             android:layout_width="32dp"
             android:layout_height="32dp"
             android:layout_centerVertical="true"
-            android:src="?attr/homeAsUpIndicator"
+            android:src="@drawable/ic_back"
             android:visibility="gone"
             android:contentDescription="@string/desc_back"
-            app:tint="#FFFFFF" />
+            app:tint="@color/white" />
 
         <TextView
             android:id="@+id/tv_title"
@@ -39,7 +39,7 @@
             android:layout_marginStart="8dp"
             android:layout_marginEnd="8dp"
             android:text="@string/title_ftp_root"
-            android:textColor="#FFFFFF"
+            android:textColor="@color/white"
             android:textSize="16sp"
             android:textStyle="bold"
             android:singleLine="true"
@@ -55,7 +55,7 @@
             android:background="?attr/selectableItemBackgroundBorderless"
             android:src="@android:drawable/stat_sys_download_done"
             android:contentDescription="@string/desc_download_list"
-            app:tint="#FFFFFF" />
+            app:tint="@color/white" />
 
         <ImageView
             android:id="@+id/iv_refresh"
@@ -67,7 +67,7 @@
             android:background="?attr/selectableItemBackgroundBorderless"
             android:src="@android:drawable/ic_popup_sync"
             android:contentDescription="@string/desc_refresh"
-            app:tint="#FFFFFF" />
+            app:tint="@color/white" />
     </RelativeLayout>
 
     <FrameLayout

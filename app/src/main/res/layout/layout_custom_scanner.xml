@@ -22,7 +22,7 @@
             android:layout_centerHorizontal="true"
             android:layout_marginTop="140dp"
             android:text="请对准影像二维码"
-            android:textColor="#FFFFFF"
+            android:textColor="@color/white"
             android:textSize="15sp"
             android:textStyle="bold" />
 

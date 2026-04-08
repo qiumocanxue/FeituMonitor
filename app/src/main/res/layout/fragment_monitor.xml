@@ -10,7 +10,7 @@
         android:layout_height="wrap_content"
         android:gravity="center"
         android:padding="8dp"
-        android:background="#FFFFFF"
+        android:background="@color/white"
         android:orientation="horizontal">
 
         <View
@@ -26,7 +26,7 @@
             android:layout_height="wrap_content"
             android:text="@string/status_initializing"
             android:textSize="12sp"
-            android:textColor="#999999" />
+            android:textColor="@color/text_secondary" />
     </LinearLayout>
 
     <androidx.recyclerview.widget.RecyclerView

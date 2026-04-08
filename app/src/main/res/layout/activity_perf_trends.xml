@@ -4,14 +4,14 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="#FFFFFF"
+    android:background="@color/white"
     android:fitsSystemWindows="true">
 
     <androidx.appcompat.widget.Toolbar
         android:id="@+id/toolbar_trends"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
-        android:background="#FFFFFF"
+        android:background="@color/white"
         app:elevation="2dp">
         <RelativeLayout android:layout_width="match_parent" android:layout_height="wrap_content">
             <ImageView
@@ -29,7 +29,7 @@
                 android:text="@string/perf_report_title"
                 android:textStyle="bold"
                 android:textSize="17sp"
-                android:textColor="#333333" />
+                android:textColor="@color/text_primary" />
         </RelativeLayout>
     </androidx.appcompat.widget.Toolbar>
 
@@ -50,7 +50,7 @@
         android:layout_height="wrap_content"
         android:padding="16dp"
         android:textSize="12sp"
-        android:textColor="#999999"
+        android:textColor="@color/text_secondary"
         android:text="@string/perf_chart_hint" />
 
 </LinearLayout>

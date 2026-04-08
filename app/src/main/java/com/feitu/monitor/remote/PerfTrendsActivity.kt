@@ -62,7 +62,7 @@ class PerfTrendsActivity : AppCompatActivity(), OnMessageReceivedListener {
             xAxis.apply {
                 position = XAxis.XAxisPosition.BOTTOM
                 setDrawGridLines(false)
-                textColor = "#999999".toColorInt()
+                textColor = "@color/text_secondary".toColorInt()
                 granularity = 1f
                 labelCount = 5
                 valueFormatter = object : ValueFormatter() {
@@ -74,7 +74,7 @@ class PerfTrendsActivity : AppCompatActivity(), OnMessageReceivedListener {
             }
 
             axisLeft.apply {
-                textColor = "#999999".toColorInt()
+                textColor = "@color/text_secondary".toColorInt()
                 setAxisMinimum(0f)
                 setAxisMaximum(105f)
                 setLabelCount(6, true)
