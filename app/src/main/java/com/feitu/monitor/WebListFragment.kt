@@ -15,6 +15,7 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
+import com.feitu.monitor.auth.AuthService
 import kotlinx.coroutines.launch
 import java.security.MessageDigest
 

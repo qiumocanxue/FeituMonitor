@@ -22,7 +22,7 @@
         android:usesCleartextTraffic="true">
 
         <receiver
-            android:name=".MyPushReceiver"
+            android:name=".notification.MyPushReceiver"
             android:enabled="true"
             android:exported="false">
             <intent-filter>
@@ -31,7 +31,7 @@
         </receiver>
 
         <service
-            android:name=".MyCommonService"
+            android:name=".common.MyCommonService"
             android:enabled="true"
             android:exported="false"
             android:process=":pushcore">
@@ -51,12 +51,12 @@
         </activity>
 
         <activity
-            android:name=".LoginActivity"
+            android:name=".auth.LoginActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
 
         <activity
-            android:name=".CustomScannerActivity"
+            android:name=".common.utils.CustomScannerActivity"
             android:theme="@style/Theme.AppCompat.Light.NoActionBar"
             android:configChanges="orientation|screenSize|screenLayout" />
 
@@ -68,21 +68,21 @@
             android:name=".download.DownloadListActivity"
             android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
 
-        <activity android:name=".AgentControlActivity" />
+        <activity android:name=".remote.AgentControlActivity" />
 
         <activity
-            android:name=".PerfTrendsActivity"
+            android:name=".remote.PerfTrendsActivity"
             android:theme="@style/Theme.AppCompat.Light.NoActionBar"
             android:configChanges="orientation|screenSize|screenLayout|smallestScreenSize" />
 
         <activity
-            android:name=".CryptoParamsActivity"
+            android:name=".common.utils.CryptoParamsActivity"
             android:exported="false"
             android:label="加密参数管理"
             android:theme="@style/Theme.MaterialComponents.DayNight.NoActionBar" />
 
         <activity
-            android:name=".RegisterUserActivity"
+            android:name=".auth.RegisterUserActivity"
             android:exported="false"
             android:label="用户注册"
             android:theme="@style/Theme.MaterialComponents.DayNight.NoActionBar" />

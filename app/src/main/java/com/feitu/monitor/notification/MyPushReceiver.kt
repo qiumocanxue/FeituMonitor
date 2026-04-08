@@ -1,4 +1,4 @@
-package com.feitu.monitor
+package com.feitu.monitor.notification
 
 import cn.jpush.android.service.JPushMessageReceiver
 

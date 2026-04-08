@@ -4,7 +4,7 @@ import android.content.Context
 import android.util.Log
 import com.google.gson.Gson
 import okhttp3.*
-import com.feitu.monitor.AuthService
+import com.feitu.monitor.auth.AuthService
 import java.io.InputStream
 import java.security.KeyStore
 import java.security.cert.X509Certificate

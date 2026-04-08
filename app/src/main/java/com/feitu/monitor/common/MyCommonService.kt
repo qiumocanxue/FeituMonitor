@@ -1,4 +1,4 @@
-package com.feitu.monitor
+package com.feitu.monitor.common
 
 import cn.jpush.android.service.JCommonService
 

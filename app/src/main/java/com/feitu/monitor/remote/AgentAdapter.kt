@@ -1,4 +1,4 @@
-package com.feitu.monitor
+package com.feitu.monitor.remote
 
 import android.graphics.Color
 import android.view.LayoutInflater
@@ -8,6 +8,7 @@ import android.widget.TextView
 import androidx.core.graphics.toColorInt
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
+import com.feitu.monitor.R
 import com.feitu.monitor.common.models.AgentInfo
 
 class AgentAdapter : RecyclerView.Adapter<AgentAdapter.AgentViewHolder>() {

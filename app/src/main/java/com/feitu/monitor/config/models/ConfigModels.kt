@@ -1,4 +1,4 @@
-package com.feitu.monitor.remote.models
+package com.feitu.monitor.config.models
 
 /**
  * 登录结果模型

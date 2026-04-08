@@ -1,4 +1,4 @@
-package com.feitu.monitor
+package com.feitu.monitor.remote
 
 import android.graphics.Color
 import android.graphics.drawable.GradientDrawable
@@ -7,6 +7,9 @@ import android.util.Log
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.graphics.toColorInt
+import com.feitu.monitor.common.ChartMarkerView
+import com.feitu.monitor.MonitorFragment
+import com.feitu.monitor.R
 import com.feitu.monitor.common.models.HistoryPoint
 import com.feitu.monitor.common.models.HistoryResponsePayload
 import com.feitu.monitor.common.models.MessageEnvelope
@@ -33,7 +36,7 @@ class PerfTrendsActivity : AppCompatActivity(), OnMessageReceivedListener {
 
         setupChartStyle()
 
-        MonitorFragment.getWssManager(this)?.let {
+        MonitorFragment.Companion.getWssManager(this)?.let {
             it.addListener(this)
             Log.i("PerfTrends", "历史数据分析链路已就绪")
         }
@@ -49,9 +52,10 @@ class PerfTrendsActivity : AppCompatActivity(), OnMessageReceivedListener {
             setNoDataText("正在从服务器拉取历史性能数据...")
             setExtraOffsets(10f, 10f, 10f, 20f)
 
-            val mv = ChartMarkerView(this@PerfTrendsActivity, R.layout.layout_chart_marker, timeLabels) {
-                rawPoints.map { mapOf("cpu" to it.cpu, "ram" to it.ram, "time" to it.time) }
-            }
+            val mv =
+                ChartMarkerView(this@PerfTrendsActivity, R.layout.layout_chart_marker, timeLabels) {
+                    rawPoints.map { mapOf("cpu" to it.cpu, "ram" to it.ram, "time" to it.time) }
+                }
             mv.chartView = this
             this.marker = mv
 
@@ -158,6 +162,6 @@ class PerfTrendsActivity : AppCompatActivity(), OnMessageReceivedListener {
 
     override fun onDestroy() {
         super.onDestroy()
-        MonitorFragment.getWssManager(this)?.removeListener(this)
+        MonitorFragment.Companion.getWssManager(this)?.removeListener(this)
     }
 }

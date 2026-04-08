@@ -1,10 +1,11 @@
-package com.feitu.monitor
+package com.feitu.monitor.notification
 
 import android.content.Context
 import android.util.Log
-import com.feitu.monitor.models.NotificationManager
-import com.feitu.monitor.models.RawNotification
-import com.feitu.monitor.models.SystemMessage
+import com.feitu.monitor.auth.AuthService
+import com.feitu.monitor.notification.models.NotificationManager
+import com.feitu.monitor.notification.models.RawNotification
+import com.feitu.monitor.notification.models.SystemMessage
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import kotlinx.coroutines.*
@@ -33,7 +34,7 @@ class NotificationService(private val context: Context) {
     // ================= 1. HTTP 获取历史消息 =================
     suspend fun fetchHistory() = withContext(Dispatchers.IO) {
         val token = authService.getToken() ?: return@withContext
-        val url = "${AuthService.BASE_URL}/api/notifications/history?limit=50"
+        val url = "${AuthService.Companion.BASE_URL}/api/notifications/history?limit=50"
 
         val request = Request.Builder()
             .url(url)
@@ -88,7 +89,7 @@ class NotificationService(private val context: Context) {
         val token = authService.getToken() ?: return
         isConnecting = true
 
-        val wsUrl = AuthService.BASE_URL.replace("http", "ws") + "/ws/web?token=$token"
+        val wsUrl = AuthService.Companion.BASE_URL.replace("http", "ws") + "/ws/web?token=$token"
         val request = Request.Builder().url(wsUrl).build()
 
         webSocket = client.newWebSocket(request, object : WebSocketListener() {

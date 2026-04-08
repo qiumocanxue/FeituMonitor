@@ -1,19 +1,21 @@
-package com.feitu.monitor
+package com.feitu.monitor.remote
 
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.View
+import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.graphics.toColorInt
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import com.feitu.monitor.MonitorFragment
+import com.feitu.monitor.R
 import com.feitu.monitor.common.models.HeartbeatPayload
 import com.feitu.monitor.common.models.MessageEnvelope
 import com.feitu.monitor.models.*
-import com.feitu.monitor.remote.AgentFileActivity
 import com.google.android.material.progressindicator.CircularProgressIndicator
 import com.google.gson.Gson
 import java.text.SimpleDateFormat
@@ -41,7 +43,7 @@ class AgentControlActivity : AppCompatActivity(), OnMessageReceivedListener {
         // 🌟 统一配置所有菜单项
         setupMenuIcons()
 
-        MonitorFragment.getWssManager(this)?.let {
+        MonitorFragment.Companion.getWssManager(this)?.let {
             it.addListener(this)
             if (it.isConnected) {
                 appendLog("监控链路已就绪")
@@ -89,7 +91,7 @@ class AgentControlActivity : AppCompatActivity(), OnMessageReceivedListener {
                 "To" to "Server",
                 "Payload" to mapOf("AgentId" to agentId, "Minutes" to 30)
             )
-            MonitorFragment.getWssManager(this)?.send(Gson().toJson(request))
+            MonitorFragment.Companion.getWssManager(this)?.send(Gson().toJson(request))
 
             // 跳转页面
             startActivity(Intent(this, PerfTrendsActivity::class.java).apply {
@@ -133,7 +135,7 @@ class AgentControlActivity : AppCompatActivity(), OnMessageReceivedListener {
     private fun setMenuItem(layoutId: Int, title: String, iconRes: Int, onClick: () -> Unit) {
         val container = findViewById<View>(layoutId)
         // 设置图标和文字
-        container.findViewById<android.widget.ImageView>(R.id.menu_icon).setImageResource(iconRes)
+        container.findViewById<ImageView>(R.id.menu_icon).setImageResource(iconRes)
         container.findViewById<TextView>(R.id.menu_text).text = title
 
         // 绑定点击事件
@@ -197,6 +199,6 @@ class AgentControlActivity : AppCompatActivity(), OnMessageReceivedListener {
 
     override fun onDestroy() {
         super.onDestroy()
-        MonitorFragment.getWssManager(this)?.removeListener(this)
+        MonitorFragment.Companion.getWssManager(this)?.removeListener(this)
     }
 }

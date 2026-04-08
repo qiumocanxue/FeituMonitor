@@ -1,9 +1,8 @@
-package com.feitu.monitor
+package com.feitu.monitor.auth
 
 import android.content.Context
 import android.util.Log
 import androidx.core.content.edit
-import com.feitu.monitor.models.*
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import kotlinx.coroutines.Dispatchers
@@ -15,8 +14,10 @@ import org.json.JSONObject
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.RequestBody.Companion.toRequestBody
 import android.annotation.SuppressLint
-import com.feitu.monitor.remote.models.EncryptionParams
-import com.feitu.monitor.remote.models.LoginResult
+import com.feitu.monitor.config.models.EncryptionParams
+import com.feitu.monitor.remote.models.FileCommand
+import com.feitu.monitor.remote.models.FilePayload
+import com.feitu.monitor.config.models.LoginResult
 
 import java.security.SecureRandom
 import java.security.cert.X509Certificate

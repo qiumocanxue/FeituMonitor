@@ -1,10 +1,15 @@
-package com.feitu.monitor
+package com.feitu.monitor.common.utils
 
+import android.content.DialogInterface
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.*
+import android.widget.EditText
+import android.widget.RelativeLayout
+import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
@@ -13,12 +18,12 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.feitu.monitor.remote.models.EncryptionParams
+import com.feitu.monitor.R
+import com.feitu.monitor.auth.AuthService
+import com.feitu.monitor.config.models.EncryptionParams
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import kotlinx.coroutines.launch
-import android.util.Log
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import android.content.DialogInterface
 
 class CryptoParamsActivity : AppCompatActivity() {
 
@@ -96,7 +101,7 @@ class CryptoParamsActivity : AppCompatActivity() {
             etAs.setText(it.accessSecret)
         }
 
-        val dialog = com.google.android.material.dialog.MaterialAlertDialogBuilder(this, R.style.FeituDialogTheme)
+        val dialog = MaterialAlertDialogBuilder(this, R.style.FeituDialogTheme)
             .setTitle(if (item == null) "新增加密参数" else "编辑加密参数")
             .setView(dialogView)
             .setCancelable(false)

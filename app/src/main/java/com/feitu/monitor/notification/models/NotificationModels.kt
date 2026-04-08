@@ -1,6 +1,4 @@
-package com.feitu.monitor.models
-
-import com.google.gson.annotations.SerializedName
+package com.feitu.monitor.notification.models
 
 // 后端返回的原始消息模型
 data class RawNotification(

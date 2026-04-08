@@ -1,6 +1,7 @@
-package com.feitu.monitor
+package com.feitu.monitor.common.utils
 
 import android.app.DatePickerDialog
+import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
@@ -10,23 +11,36 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.*
+import android.view.inputmethod.InputMethodManager
+import android.widget.ArrayAdapter
+import android.widget.AutoCompleteTextView
+import android.widget.Button
+import android.widget.EditText
+import android.widget.ImageView
+import android.widget.ScrollView
+import android.widget.TextView
+import android.widget.Toast
 import androidx.core.content.FileProvider
 import androidx.core.net.toUri
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
+import com.feitu.monitor.MainActivity
+import com.feitu.monitor.R
+import com.feitu.monitor.auth.AuthService
+import com.google.android.material.textfield.TextInputLayout
 import com.google.zxing.BarcodeFormat
+import com.google.zxing.client.android.Intents
 import com.journeyapps.barcodescanner.BarcodeEncoder
 import com.journeyapps.barcodescanner.ScanContract
 import com.journeyapps.barcodescanner.ScanOptions
 import kotlinx.coroutines.launch
 import java.io.File
 import java.io.FileOutputStream
-import java.util.*
+import java.util.Calendar
+import java.util.Locale
 import javax.crypto.Cipher
 import javax.crypto.spec.IvParameterSpec
 import javax.crypto.spec.SecretKeySpec
-import com.google.android.material.textfield.TextInputLayout
 
 class QrGeneratorFragment : Fragment() {
 
@@ -82,20 +96,22 @@ class QrGeneratorFragment : Fragment() {
 
         btnPickDate?.setOnClickListener {
             val c = Calendar.getInstance()
-            val datePickerDialog = DatePickerDialog(requireContext(), R.style.FeituDatePickerTheme, { _, y, m, d ->
-                // 🌟 修复 Warning 108: 明确指定 Locale
-                selectedDate = String.format(Locale.US, "%d%02d%02d", y, m + 1, d)
-                // 🌟 修复 Warning 109: 使用字符串资源占位符
-                btnPickDate.text = getString(R.string.date_prefix, selectedDate)
-            }, c.get(Calendar.YEAR), c.get(Calendar.MONTH), c.get(Calendar.DAY_OF_MONTH))
+            val datePickerDialog =
+                DatePickerDialog(requireContext(), R.style.FeituDatePickerTheme, { _, y, m, d ->
+                    // 🌟 修复 Warning 108: 明确指定 Locale
+                    selectedDate = String.Companion.format(Locale.US, "%d%02d%02d", y, m + 1, d)
+                    // 🌟 修复 Warning 109: 使用字符串资源占位符
+                    btnPickDate.text = getString(R.string.date_prefix, selectedDate)
+                }, c.get(Calendar.YEAR), c.get(Calendar.MONTH), c.get(Calendar.DAY_OF_MONTH))
 
-            datePickerDialog.datePicker.init(c.get(Calendar.YEAR), c.get(Calendar.MONTH), c.get(Calendar.DAY_OF_MONTH)) { _, year, month, day ->
+            datePickerDialog.datePicker.init(c.get(Calendar.YEAR), c.get(Calendar.MONTH), c.get(
+                Calendar.DAY_OF_MONTH)) { _, year, month, day ->
                 val now = System.currentTimeMillis()
                 val current = "$year$month$day"
 
                 if (now - lastClickTime < 500 && current == lastDateStr) {
                     // 🌟 修复 Warning 119/120: 同上
-                    selectedDate = String.format(Locale.US, "%d%02d%02d", year, month + 1, day)
+                    selectedDate = String.Companion.format(Locale.US, "%d%02d%02d", year, month + 1, day)
                     btnPickDate.text = getString(R.string.date_prefix, selectedDate)
                     datePickerDialog.dismiss()
                     Toast.makeText(context, "已快速选择: $selectedDate", Toast.LENGTH_SHORT).show()
@@ -143,7 +159,7 @@ class QrGeneratorFragment : Fragment() {
                 setPrompt("")
                 setBeepEnabled(true)
                 setOrientationLocked(true)
-                addExtra(com.google.zxing.client.android.Intents.Scan.CAMERA_ID, 0)
+                addExtra(Intents.Scan.CAMERA_ID, 0)
                 setCaptureActivity(CustomScannerActivity::class.java)
             }
             barcodeLauncher.launch(options)
@@ -178,7 +194,7 @@ class QrGeneratorFragment : Fragment() {
         // 5. 复制与分享
         tvUrl?.setOnClickListener {
             val cm = requireContext().getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-            cm.setPrimaryClip(android.content.ClipData.newPlainText("URL", tvUrl.text))
+            cm.setPrimaryClip(ClipData.newPlainText("URL", tvUrl.text))
             Toast.makeText(context, "已复制", Toast.LENGTH_SHORT).show()
         }
 
@@ -188,7 +204,7 @@ class QrGeneratorFragment : Fragment() {
             etKey?.clearFocus()
             etIv?.clearFocus()
             scrollView?.requestFocus()
-            val imm = requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as android.view.inputmethod.InputMethodManager
+            val imm = requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
             imm.hideSoftInputFromWindow(view?.windowToken, 0)
             currentQrBitmap?.let { shareBitmapViaFileProvider(it) }
         }
@@ -223,7 +239,11 @@ class QrGeneratorFragment : Fragment() {
                 if (filteredList.isNotEmpty()) {
                     til.visibility = View.VISIBLE
                     val names = filteredList.map { it.hospitalName }
-                    val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_dropdown_item_1line, names)
+                    val adapter = ArrayAdapter(
+                        requireContext(),
+                        android.R.layout.simple_dropdown_item_1line,
+                        names
+                    )
                     actv.setAdapter(adapter)
 
                     actv.setOnClickListener { actv.showDropDown() }
@@ -280,7 +300,11 @@ class QrGeneratorFragment : Fragment() {
     private fun encryptAES(data: String, key: String, iv: String): String {
         if (key.length != 16) return data
         val cipher = Cipher.getInstance("AES/CBC/PKCS5Padding")
-        cipher.init(Cipher.ENCRYPT_MODE, SecretKeySpec(key.toByteArray(), "AES"), IvParameterSpec(iv.toByteArray()))
+        cipher.init(
+            Cipher.ENCRYPT_MODE,
+            SecretKeySpec(key.toByteArray(), "AES"),
+            IvParameterSpec(iv.toByteArray())
+        )
         // 🌟 格式化通常也建议指定 Locale
         return cipher.doFinal(data.toByteArray()).joinToString("") { "%02X".format(Locale.US, it) }
     }

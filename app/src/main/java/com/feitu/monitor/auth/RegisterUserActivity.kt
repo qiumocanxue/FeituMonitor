@@ -1,10 +1,11 @@
-package com.feitu.monitor
+package com.feitu.monitor.auth
 
 import android.os.Bundle
 import android.view.View
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
+import com.feitu.monitor.R
 import kotlinx.coroutines.launch
 
 class RegisterUserActivity : AppCompatActivity() {

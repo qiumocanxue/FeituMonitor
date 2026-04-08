@@ -21,11 +21,17 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.fragment.app.Fragment
 import cn.jpush.android.api.JPushInterface
 import com.google.android.material.bottomnavigation.BottomNavigationView
-import com.feitu.monitor.models.NotificationManager
+import com.feitu.monitor.notification.models.NotificationManager
 import androidx.lifecycle.lifecycleScope
+import com.feitu.monitor.auth.AuthService
+import com.feitu.monitor.auth.LoginActivity
 import com.feitu.monitor.cloud.FileCenterFragment
 import kotlinx.coroutines.launch
 import com.feitu.monitor.cloud.models.FtpUtils
+import com.feitu.monitor.common.utils.QrGeneratorFragment
+import com.feitu.monitor.config.ConfigFragment
+import com.feitu.monitor.notification.NotificationFragment
+import com.feitu.monitor.notification.NotificationService
 import java.io.File
 
 class MainActivity : AppCompatActivity() {

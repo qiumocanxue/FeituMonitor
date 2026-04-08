@@ -16,12 +16,12 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.feitu.monitor.MonitorFragment
 import com.feitu.monitor.R
-import com.feitu.monitor.models.FileAction
-import com.feitu.monitor.models.FileCommand
-import com.feitu.monitor.models.FilePayload
+import com.feitu.monitor.remote.models.FileAction
+import com.feitu.monitor.remote.models.FileCommand
+import com.feitu.monitor.remote.models.FilePayload
 import com.feitu.monitor.common.models.MessageEnvelope
 import com.feitu.monitor.models.OnMessageReceivedListener
-import com.feitu.monitor.models.RemoteDataResponse
+import com.feitu.monitor.remote.models.RemoteDataResponse
 import com.feitu.monitor.remote.models.RemoteFile
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.gson.Gson

@@ -1,4 +1,4 @@
-package com.feitu.monitor
+package com.feitu.monitor.notification
 
 import android.content.res.ColorStateList
 import android.graphics.Color
@@ -8,16 +8,14 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.FrameLayout
 import android.widget.ImageView
-import android.widget.RelativeLayout
 import android.widget.TextView
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-import com.feitu.monitor.models.NotificationManager
+import com.feitu.monitor.R
+import com.feitu.monitor.notification.models.NotificationManager
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.*

@@ -1,12 +1,14 @@
-package com.feitu.monitor
+package com.feitu.monitor.common.utils
 
 import android.os.Bundle
 import android.view.View
 import android.view.animation.Animation
 import android.view.animation.TranslateAnimation
 import androidx.appcompat.app.AppCompatActivity
+import com.feitu.monitor.R
 import com.journeyapps.barcodescanner.CaptureManager
 import com.journeyapps.barcodescanner.CompoundBarcodeView
+import com.journeyapps.barcodescanner.camera.CameraSettings
 
 class CustomScannerActivity : AppCompatActivity() {
 
@@ -20,7 +22,7 @@ class CustomScannerActivity : AppCompatActivity() {
         barcodeScannerView = findViewById(R.id.zxing_barcode_scanner)
 
         // 强制开启连续自动对焦
-        val cameraSettings = com.journeyapps.barcodescanner.camera.CameraSettings()
+        val cameraSettings = CameraSettings()
         cameraSettings.isAutoFocusEnabled = true       // 开启对焦
         cameraSettings.isContinuousFocusEnabled = true // 开启连续对焦（像录像一样不停对焦）
         barcodeScannerView.cameraSettings = cameraSettings

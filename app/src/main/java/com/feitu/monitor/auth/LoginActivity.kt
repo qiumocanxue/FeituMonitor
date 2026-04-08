@@ -1,4 +1,4 @@
-package com.feitu.monitor
+package com.feitu.monitor.auth
 
 import android.os.Bundle
 import android.view.View
@@ -7,6 +7,7 @@ import android.widget.ProgressBar
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
+import com.feitu.monitor.R
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.textfield.TextInputEditText
 import kotlinx.coroutines.launch

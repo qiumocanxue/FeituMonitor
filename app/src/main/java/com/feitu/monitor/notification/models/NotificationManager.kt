@@ -1,8 +1,4 @@
-package com.feitu.monitor.models
-
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.withContext
+package com.feitu.monitor.notification.models
 
 
 // 1. 消息数据模型

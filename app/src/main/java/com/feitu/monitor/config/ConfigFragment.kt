@@ -1,9 +1,13 @@
-package com.feitu.monitor
+package com.feitu.monitor.config
 
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import androidx.fragment.app.Fragment
+import com.feitu.monitor.common.utils.CryptoParamsActivity
+import com.feitu.monitor.MainActivity
+import com.feitu.monitor.R
+import com.feitu.monitor.auth.RegisterUserActivity
 
 /**
  * “配置”菜单主页面
