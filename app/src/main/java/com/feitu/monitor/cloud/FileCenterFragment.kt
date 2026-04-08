@@ -34,6 +34,7 @@ import kotlinx.coroutines.withContext
 import java.net.HttpURLConnection
 import java.net.URL
 import java.net.URLDecoder
+import com.feitu.monitor.common.utils.FileIconUtils
 
 class FileCenterFragment : Fragment() {
 
@@ -274,37 +275,25 @@ class FileCenterFragment : Fragment() {
         }
 
         override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-            // 🌟 3. 使用 getItem(position) 获取数据
             val item = getItem(position)
 
-            holder.tvName.text = item.name
+            holder.tvName.text = item.fileName // 🌟 使用接口属性
             holder.tvName.textSize = 15f
             holder.tvName.setTextColor("#333333".toColorInt())
 
-            holder.tvMeta.text = holder.itemView.context.getString(R.string.ftp_meta_format, item.date, item.size)
+            // 🌟 使用接口属性简化代码
+            holder.tvMeta.text = holder.itemView.context.getString(
+                R.string.ftp_meta_format,
+                item.dateText,
+                item.sizeText
+            )
             holder.tvMeta.textSize = 12f
             holder.tvMeta.setTextColor("#888888".toColorInt())
 
-            holder.ivIcon.setImageResource(getFileIcon(item))
-            holder.itemView.setOnClickListener { onClick(item) }
-        }
+            // 🌟 替换为统一逻辑
+            holder.ivIcon.setImageResource(FileIconUtils.getFileIconRes(item))
 
-        private fun getFileIcon(item: FtpItem): Int {
-            if (item.isDir) return R.drawable.ic_folder
-            val name = item.name.lowercase()
-            return when {
-                name.endsWith(".doc") || name.endsWith(".docx") -> R.drawable.ic_file_word
-                name.endsWith(".xls") || name.endsWith(".xlsx") || name.endsWith(".csv") -> R.drawable.ic_file_excel
-                name.endsWith(".ppt") || name.endsWith(".pptx") -> R.drawable.ic_file_ppt
-                name.endsWith(".pdf") -> R.drawable.ic_file_pdf
-                name.endsWith(".txt") || name.endsWith(".log") || name.endsWith(".ini") || name.endsWith(".json") || name.endsWith(".xml") -> R.drawable.ic_file_txt
-                name.endsWith(".zip") || name.endsWith(".rar") || name.endsWith(".7z") || name.endsWith(".tar") || name.endsWith(".gz") -> R.drawable.ic_file_zip
-                name.endsWith(".png") || name.endsWith(".jpg") || name.endsWith(".jpeg") || name.endsWith(".gif") || name.endsWith(".webp") || name.endsWith(".bmp") -> R.drawable.ic_file_image
-                name.endsWith(".mp4") || name.endsWith(".mkv") || name.endsWith(".mov") || name.endsWith(".avi") || name.endsWith(".rmvb") -> R.drawable.ic_file_video
-                name.endsWith(".mp3") || name.endsWith(".wav") || name.endsWith(".flac") || name.endsWith(".m4a") -> R.drawable.ic_file_audio
-                name.endsWith(".url") || name.endsWith(".link") -> R.drawable.ic_file_url
-                else -> R.drawable.ic_file_unknown
-            }
+            holder.itemView.setOnClickListener { onClick(item) }
         }
     }
 }

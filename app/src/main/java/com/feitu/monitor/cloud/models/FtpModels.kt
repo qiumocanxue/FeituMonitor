@@ -18,6 +18,7 @@ import kotlinx.coroutines.withContext
 import java.io.FileOutputStream
 import java.net.HttpURLConnection
 import java.net.URL
+import com.feitu.monitor.common.models.IFileItem
 
 // 1. 文件项模型
 data class FtpItem(
@@ -26,7 +27,13 @@ data class FtpItem(
     val isDir: Boolean,
     val date: String,
     val size: String
-)
+) : IFileItem {
+    override val fileName: String get() = name
+    override val isDirectory: Boolean get() = isDir
+    override val sizeText: String get() = size
+    override val dateText: String get() = date
+    override val fullPath: String get() = href
+}
 
 // 2. 认证与全局配置
 object FtpConfig {
