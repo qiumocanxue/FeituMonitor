@@ -1,10 +1,13 @@
-package com.feitu.monitor.models
+package com.feitu.monitor.cloud.models
 
+import android.R
 import android.util.Base64
 import android.content.Context
 import android.content.Intent
 import android.webkit.MimeTypeMap
+import android.widget.ProgressBar
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.core.content.FileProvider
 import java.io.File
 import java.util.Locale // 🌟 必须导入
@@ -12,6 +15,9 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.io.FileOutputStream
+import java.net.HttpURLConnection
+import java.net.URL
 
 // 1. 文件项模型
 data class FtpItem(
@@ -147,11 +153,11 @@ object FtpCacheManager {
         checkAndCleanCache(cacheDir)
         val targetFile = File(cacheDir, fileName)
 
-        val progressBar = android.widget.ProgressBar(context, null, android.R.attr.progressBarStyleHorizontal).apply {
+        val progressBar = ProgressBar(context, null, R.attr.progressBarStyleHorizontal).apply {
             setPadding(64, 32, 64, 32)
             max = 100
         }
-        val dialog = androidx.appcompat.app.AlertDialog.Builder(context)
+        val dialog = AlertDialog.Builder(context)
             .setTitle("正在缓冲: $fileName")
             .setView(progressBar)
             .setCancelable(false)
@@ -161,7 +167,7 @@ object FtpCacheManager {
 
         val job = CoroutineScope(Dispatchers.IO).launch {
             try {
-                val connection = java.net.URL(url).openConnection() as java.net.HttpURLConnection
+                val connection = URL(url).openConnection() as HttpURLConnection
                 connection.setRequestProperty("Authorization", FtpConfig.getBasicAuthHeader())
                 connection.connectTimeout = 10000
 
@@ -169,7 +175,7 @@ object FtpCacheManager {
                     val total = connection.contentLengthLong
 
                     val input = connection.inputStream
-                    val output = java.io.FileOutputStream(targetFile)
+                    val output = FileOutputStream(targetFile)
                     val buffer = ByteArray(8 * 1024)
                     var read: Int
                     var downloaded = 0L
@@ -214,7 +220,7 @@ object FtpCacheManager {
             }
         }
 
-        dialog.getButton(androidx.appcompat.app.AlertDialog.BUTTON_NEGATIVE).setOnClickListener {
+        dialog.getButton(AlertDialog.BUTTON_NEGATIVE).setOnClickListener {
             job.cancel()
             dialog.dismiss()
         }

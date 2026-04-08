@@ -1,4 +1,4 @@
-package com.feitu.monitor.utils
+package com.feitu.monitor.common.utils
 
 import android.util.Base64
 import java.io.File

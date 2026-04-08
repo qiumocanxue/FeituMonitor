@@ -14,6 +14,9 @@ import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.SimpleItemAnimator
+import com.feitu.monitor.common.models.AgentInfo
+import com.feitu.monitor.common.models.HeartbeatPayload
+import com.feitu.monitor.common.models.MessageEnvelope
 import com.feitu.monitor.models.*
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken

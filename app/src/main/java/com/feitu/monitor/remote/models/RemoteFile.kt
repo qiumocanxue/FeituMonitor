@@ -1,4 +1,4 @@
-package com.feitu.monitor.models
+package com.feitu.monitor.remote.models
 
 data class RemoteFile(
     val name: String,

@@ -1,6 +1,4 @@
-package com.feitu.monitor.models
-
-import com.google.gson.annotations.SerializedName
+package com.feitu.monitor.remote.models
 
 /**
  * 登录结果模型

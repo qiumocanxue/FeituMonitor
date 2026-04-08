@@ -8,7 +8,7 @@ import android.widget.TextView
 import androidx.core.graphics.toColorInt
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
-import com.feitu.monitor.models.AgentInfo
+import com.feitu.monitor.common.models.AgentInfo
 
 class AgentAdapter : RecyclerView.Adapter<AgentAdapter.AgentViewHolder>() {
 

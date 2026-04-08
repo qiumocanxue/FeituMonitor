@@ -1,4 +1,4 @@
-package com.feitu.monitor
+package com.feitu.monitor.remote
 
 import android.view.LayoutInflater
 import android.view.View
@@ -6,8 +6,9 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
-import com.feitu.monitor.models.RemoteFile
-import java.util.*
+import com.feitu.monitor.R
+import com.feitu.monitor.remote.models.RemoteFile
+import java.util.Locale
 
 class FileAdapter(
     private val items: List<RemoteFile>,

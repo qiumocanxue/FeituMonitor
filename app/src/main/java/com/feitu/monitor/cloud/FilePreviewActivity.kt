@@ -1,4 +1,4 @@
-package com.feitu.monitor
+package com.feitu.monitor.cloud
 
 import android.os.Bundle
 import android.widget.TextView
@@ -9,7 +9,8 @@ import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.lifecycle.lifecycleScope
-import com.feitu.monitor.models.FtpConfig
+import com.feitu.monitor.R
+import com.feitu.monitor.cloud.models.FtpConfig
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext

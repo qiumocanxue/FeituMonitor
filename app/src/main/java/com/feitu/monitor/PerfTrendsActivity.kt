@@ -7,6 +7,9 @@ import android.util.Log
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.graphics.toColorInt
+import com.feitu.monitor.common.models.HistoryPoint
+import com.feitu.monitor.common.models.HistoryResponsePayload
+import com.feitu.monitor.common.models.MessageEnvelope
 import com.feitu.monitor.models.*
 import com.github.mikephil.charting.charts.LineChart
 import com.github.mikephil.charting.components.XAxis

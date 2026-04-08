@@ -61,11 +61,11 @@
             android:configChanges="orientation|screenSize|screenLayout" />
 
         <activity
-            android:name=".FilePreviewActivity"
+            android:name=".cloud.FilePreviewActivity"
             android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
 
         <activity
-            android:name=".DownloadListActivity"
+            android:name=".download.DownloadListActivity"
             android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
 
         <activity android:name=".AgentControlActivity" />
@@ -88,7 +88,7 @@
             android:theme="@style/Theme.MaterialComponents.DayNight.NoActionBar" />
 
         <activity
-            android:name=".AgentFileActivity"
+            android:name=".remote.AgentFileActivity"
             android:exported="false"
             android:label="文件管理"
             android:theme="@style/Theme.MaterialComponents.DayNight.NoActionBar" />

@@ -23,8 +23,9 @@ import cn.jpush.android.api.JPushInterface
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.feitu.monitor.models.NotificationManager
 import androidx.lifecycle.lifecycleScope
+import com.feitu.monitor.cloud.FileCenterFragment
 import kotlinx.coroutines.launch
-import com.feitu.monitor.models.FtpUtils
+import com.feitu.monitor.cloud.models.FtpUtils
 import java.io.File
 
 class MainActivity : AppCompatActivity() {

@@ -1,4 +1,4 @@
-package com.feitu.monitor
+package com.feitu.monitor.remote
 
 import android.graphics.Color
 import android.os.Bundle
@@ -14,7 +14,15 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-import com.feitu.monitor.models.*
+import com.feitu.monitor.MonitorFragment
+import com.feitu.monitor.R
+import com.feitu.monitor.models.FileAction
+import com.feitu.monitor.models.FileCommand
+import com.feitu.monitor.models.FilePayload
+import com.feitu.monitor.common.models.MessageEnvelope
+import com.feitu.monitor.models.OnMessageReceivedListener
+import com.feitu.monitor.models.RemoteDataResponse
+import com.feitu.monitor.remote.models.RemoteFile
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.gson.Gson
 import org.json.JSONObject
@@ -55,7 +63,7 @@ class AgentFileActivity : AppCompatActivity(), OnMessageReceivedListener {
         initUI()
 
         // 注册监听
-        MonitorFragment.getWssManager(this)?.addListener(this)
+        MonitorFragment.Companion.getWssManager(this)?.addListener(this)
 
         // 初始加载
         loadFiles(currentPath)
@@ -141,7 +149,7 @@ class AgentFileActivity : AppCompatActivity(), OnMessageReceivedListener {
         )
 
         val json = gson.toJson(command)
-        val wss = MonitorFragment.getWssManager(this)
+        val wss = MonitorFragment.Companion.getWssManager(this)
         if (wss != null && wss.isConnected) {
             wss.send(json)
         } else {
@@ -170,24 +178,28 @@ class AgentFileActivity : AppCompatActivity(), OnMessageReceivedListener {
 
                     // 文件夹
                     responseData.SubFolders?.forEach { folderName ->
-                        newList.add(RemoteFile(
-                            name = folderName,
-                            isDirectory = true,
-                            size = 0,
-                            lastModified = "-",
-                            absolutePath = combinePath(pathFromRemote, folderName)
-                        ))
+                        newList.add(
+                            RemoteFile(
+                                name = folderName,
+                                isDirectory = true,
+                                size = 0,
+                                lastModified = "-",
+                                absolutePath = combinePath(pathFromRemote, folderName)
+                            )
+                        )
                     }
 
                     // 文件
                     responseData.Files?.forEach { fileItem ->
-                        newList.add(RemoteFile(
-                            name = fileItem.Name,
-                            isDirectory = false,
-                            size = fileItem.Size,
-                            lastModified = fileItem.LastMod,
-                            absolutePath = combinePath(pathFromRemote, fileItem.Name)
-                        ))
+                        newList.add(
+                            RemoteFile(
+                                name = fileItem.Name,
+                                isDirectory = false,
+                                size = fileItem.Size,
+                                lastModified = fileItem.LastMod,
+                                absolutePath = combinePath(pathFromRemote, fileItem.Name)
+                            )
+                        )
                     }
 
                     // 排序
@@ -234,7 +246,7 @@ class AgentFileActivity : AppCompatActivity(), OnMessageReceivedListener {
             From = "Android", To = agentId,
             Payload = FilePayload(Action = FileAction.OPEN, Path = file.absolutePath)
         )
-        MonitorFragment.getWssManager(this)?.send(gson.toJson(command))
+        MonitorFragment.Companion.getWssManager(this)?.send(gson.toJson(command))
         Toast.makeText(this, "正在请求打开文件...", Toast.LENGTH_SHORT).show()
     }
 
@@ -247,7 +259,7 @@ class AgentFileActivity : AppCompatActivity(), OnMessageReceivedListener {
                     From = "Android", To = agentId,
                     Payload = FilePayload(Action = FileAction.DELETE, Path = file.absolutePath)
                 )
-                MonitorFragment.getWssManager(this)?.send(gson.toJson(command))
+                MonitorFragment.Companion.getWssManager(this)?.send(gson.toJson(command))
             }
             .setNegativeButton("取消", null)
             .show()
@@ -272,6 +284,6 @@ class AgentFileActivity : AppCompatActivity(), OnMessageReceivedListener {
 
     override fun onDestroy() {
         super.onDestroy()
-        MonitorFragment.getWssManager(this)?.removeListener(this)
+        MonitorFragment.Companion.getWssManager(this)?.removeListener(this)
     }
 }

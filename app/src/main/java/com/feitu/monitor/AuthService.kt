@@ -15,13 +15,14 @@ import org.json.JSONObject
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.RequestBody.Companion.toRequestBody
 import android.annotation.SuppressLint
+import com.feitu.monitor.remote.models.EncryptionParams
+import com.feitu.monitor.remote.models.LoginResult
 
 import java.security.SecureRandom
 import java.security.cert.X509Certificate
 import javax.net.ssl.SSLContext
 import javax.net.ssl.TrustManager
 import javax.net.ssl.X509TrustManager
-import okhttp3.Protocol
 
 data class ApiResponse(val success: Boolean, val message: String?)
 
@@ -109,7 +110,10 @@ class AuthService(context: Context) {
                             putString("jwt_token", token)
                             putString("username", username)
                         }
-                        return@withContext LoginResult(true, jsonObject.optString("message", "登录成功"))
+                        return@withContext LoginResult(
+                            true,
+                            jsonObject.optString("message", "登录成功")
+                        )
                     } else {
                         val errorDetail = jsonObject.optString("message", "登录失败")
                         return@withContext LoginResult(false, errorDetail)

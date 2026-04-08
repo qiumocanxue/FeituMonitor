@@ -1,4 +1,4 @@
-package com.feitu.monitor.models
+package com.feitu.monitor.common.models
 
 import androidx.annotation.Keep
 

@@ -1,4 +1,4 @@
-package com.feitu.monitor
+package com.feitu.monitor.download
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -8,6 +8,7 @@ import android.widget.Button
 import android.widget.ImageView
 import android.widget.ProgressBar
 import android.widget.TextView
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.core.view.ViewCompat
@@ -18,10 +19,11 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
-import com.feitu.monitor.models.DownloadStatus
-import com.feitu.monitor.models.DownloadTask
-import com.feitu.monitor.models.FtpDownloadManager
-import com.feitu.monitor.models.FtpUtils
+import com.feitu.monitor.R
+import com.feitu.monitor.cloud.models.FtpUtils
+import com.feitu.monitor.download.models.DownloadStatus
+import com.feitu.monitor.download.models.DownloadTask
+import com.feitu.monitor.download.models.FtpDownloadManager
 
 class DownloadListActivity : AppCompatActivity() {
 
@@ -146,7 +148,7 @@ class DownloadListActivity : AppCompatActivity() {
             holder.itemView.setOnClickListener(clickAction)
 
             holder.btnDelete.setOnClickListener {
-                androidx.appcompat.app.AlertDialog.Builder(this@DownloadListActivity)
+                AlertDialog.Builder(this@DownloadListActivity)
                     .setTitle(R.string.dialog_delete_title)
                     .setMessage(R.string.dialog_delete_msg)
                     .setPositiveButton(R.string.delete) { _, _ -> FtpDownloadManager.deleteDownload(task, this@DownloadListActivity) }

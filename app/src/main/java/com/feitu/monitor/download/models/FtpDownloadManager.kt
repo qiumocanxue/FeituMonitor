@@ -1,9 +1,10 @@
-package com.feitu.monitor.models
+package com.feitu.monitor.download.models
 
 import android.content.Context
 import android.os.Environment
 import android.util.Log
 import androidx.core.content.edit
+import com.feitu.monitor.cloud.models.FtpConfig
 import kotlinx.coroutines.*
 import org.json.JSONArray
 import org.json.JSONObject
@@ -11,26 +12,8 @@ import java.io.File
 import java.io.RandomAccessFile
 import java.net.HttpURLConnection
 import java.net.URL
-import java.util.Locale // 🌟 必须导入 Locale
+import java.util.Locale
 
-// 1. 下载状态枚举
-enum class DownloadStatus { PENDING, DOWNLOADING, PAUSED, COMPLETED, FAILED }
-
-// 2. 下载任务数据模型
-data class DownloadTask(
-    val id: String,
-    val fileName: String,
-    val url: String,
-    val savePath: String,
-    var progress: Int = 0,
-    var totalBytes: Long = 0,
-    var downloadedBytes: Long = 0,
-    var speed: String = "0 KB/s",
-    var status: DownloadStatus = DownloadStatus.PENDING,
-    @Transient var job: Job? = null
-)
-
-// 3. 下载管理器单例
 object FtpDownloadManager {
     val tasks = mutableListOf<DownloadTask>()
     var onStateChanged: (() -> Unit)? = null

@@ -12,6 +12,7 @@ import java.util.*
 import java.util.concurrent.TimeUnit
 import javax.net.ssl.*
 import android.annotation.SuppressLint
+import com.feitu.monitor.common.models.MessageEnvelope
 import java.util.concurrent.CopyOnWriteArraySet
 
 class MonitorWebSocketManager(private val context: Context) {

@@ -10,7 +10,10 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.graphics.toColorInt
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import com.feitu.monitor.common.models.HeartbeatPayload
+import com.feitu.monitor.common.models.MessageEnvelope
 import com.feitu.monitor.models.*
+import com.feitu.monitor.remote.AgentFileActivity
 import com.google.android.material.progressindicator.CircularProgressIndicator
 import com.google.gson.Gson
 import java.text.SimpleDateFormat

@@ -1,15 +1,18 @@
-package com.feitu.monitor
+package com.feitu.monitor.cloud
 
 import android.content.Intent
 import android.os.Bundle
+import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
+import android.widget.LinearLayout
 import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
+import androidx.appcompat.app.AlertDialog
 import androidx.core.graphics.toColorInt
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
@@ -17,9 +20,14 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
-import com.feitu.monitor.models.FtpConfig
-import com.feitu.monitor.models.FtpItem
-import com.feitu.monitor.models.FtpUtils
+import com.feitu.monitor.download.DownloadListActivity
+import com.feitu.monitor.MainActivity
+import com.feitu.monitor.R
+import com.feitu.monitor.cloud.models.FtpCacheManager
+import com.feitu.monitor.cloud.models.FtpConfig
+import com.feitu.monitor.download.models.FtpDownloadManager
+import com.feitu.monitor.cloud.models.FtpItem
+import com.feitu.monitor.cloud.models.FtpUtils
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -196,20 +204,20 @@ class FileCenterFragment : Fragment() {
                 }
                 startActivity(intent)
             } else if (isThirdPartyPreview) {
-                androidx.appcompat.app.AlertDialog.Builder(requireContext())
+                AlertDialog.Builder(requireContext())
                     .setTitle(R.string.dialog_title_file_ops)
                     .setMessage(R.string.dialog_msg_file_ops)
                     .setPositiveButton(R.string.action_preview) { _, _ ->
-                        com.feitu.monitor.models.FtpCacheManager.previewFile(requireContext(), fileUrl, item.name)
+                        FtpCacheManager.previewFile(requireContext(), fileUrl, item.name)
                     }
                     .setNegativeButton(R.string.action_download) { _, _ ->
-                        val success = com.feitu.monitor.models.FtpDownloadManager.promoteCacheToDownload(
+                        val success = FtpDownloadManager.promoteCacheToDownload(
                             requireContext(), item.name, fileUrl
                         )
                         if (success) {
                             Toast.makeText(context, R.string.toast_cache_restored, Toast.LENGTH_SHORT).show()
                         } else {
-                            com.feitu.monitor.models.FtpDownloadManager.startOrResumeDownload(
+                            FtpDownloadManager.startOrResumeDownload(
                                 fileUrl, item.name, requireContext()
                             )
                             Toast.makeText(context, R.string.toast_download_added, Toast.LENGTH_SHORT).show()
@@ -218,7 +226,7 @@ class FileCenterFragment : Fragment() {
                     .setNeutralButton(R.string.action_cancel, null)
                     .show()
             } else {
-                com.feitu.monitor.models.FtpDownloadManager.startOrResumeDownload(fileUrl, item.name, requireContext())
+                FtpDownloadManager.startOrResumeDownload(fileUrl, item.name, requireContext())
                 Toast.makeText(context, R.string.toast_download_added, Toast.LENGTH_SHORT).show()
             }
         }
@@ -250,14 +258,14 @@ class FileCenterFragment : Fragment() {
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
             val context = parent.context
             val view = LayoutInflater.from(context).inflate(android.R.layout.simple_list_item_2, parent, false)
-            val root = android.widget.LinearLayout(context).apply {
-                orientation = android.widget.LinearLayout.HORIZONTAL
+            val root = LinearLayout(context).apply {
+                orientation = LinearLayout.HORIZONTAL
                 setPadding(32, 32, 32, 32)
-                gravity = android.view.Gravity.CENTER_VERTICAL
+                gravity = Gravity.CENTER_VERTICAL
 
                 val icon = ImageView(context).apply {
                     id = android.R.id.icon
-                    layoutParams = android.widget.LinearLayout.LayoutParams(80, 80).apply { setMargins(0,0,32,0) }
+                    layoutParams = LinearLayout.LayoutParams(80, 80).apply { setMargins(0,0,32,0) }
                 }
                 addView(icon)
                 addView(view)
