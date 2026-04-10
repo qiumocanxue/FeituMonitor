@@ -2,9 +2,7 @@ package com.feitu.monitor.remote.models
 
 import java.util.UUID
 
-/**
- * 1. 远程文件发送指令协议 (手机 -> Server -> Agent)
- */
+
 data class FileCommand(
     val Type: String = "FileCommand",
     val From: String,
@@ -14,42 +12,59 @@ data class FileCommand(
 )
 
 /**
+ * 1. 消息类型常量
+ */
+object MessageType {
+    const val FILE_COMMAND = "FileCommand"
+    const val FILE_RESPONSE = "FileResponse"
+    const val FILE_DATA = "FileData"
+    const val ERROR = "Error"
+}
+
+/**
  * 指令具体载荷
  */
 data class FilePayload(
-    val Action: String,      // 对应 FileAction 中的常量
-    val Path: String,        // 远程机器的绝对路径
-    val Base64Data: String? = null // 上传或写入时使用的内容
+    val Action: String,
+    val Path: String,
+    val Base64Data: String? = null,
+    val FileSize: Long? = null,
+    val TotalChunks: Int? = null
 )
 
 /**
- * 2. 远程文件响应解析模型 (Agent -> Server -> 手机)
- * 匹配你日志中 Data 字段的结构
+ * 远程文件响应解析模型 (通用包装)
+ */
+data class FileResponsePayload(
+    val Status: String? = null,
+    val Message: String? = null,
+    val Data: RemoteDataResponse? = null,
+    val Content: String? = null,
+    val Path: String? = null,
+    val FileName: String? = null
+)
+/**
+ * 目录清单 Data 结构
  */
 data class RemoteDataResponse(
     val CurrentPath: String?,
     val SubFolders: List<String>?,
     val Files: List<RemoteFileItem>?,
-    val Status: String?,
     val Error: String?
 )
 
-/**
- * 响应中 Files 列表的具体单项
- */
 data class RemoteFileItem(
     val Name: String,
-    val Size: Long,      // 对应日志中的 Size
-    val LastMod: String  // 对应日志中的 LastMod
+    val Size: Long,
+    val LastMod: String
 )
 
-/**
- * 🌟 指令常量定义
- */
 object FileAction {
-    const val OPEN = "OpenFile"      // 打开/读取文件内容
-    const val DOWNLOAD = "Download"  // 下载文件
-    const val UPLOAD = "Upload"      // 上传文件
-    const val DELETE = "Delete"      // 删除文件
-    const val LIST = "ListFiles"     // 获取目录列表
+    const val LIST = "ListFiles"
+    const val OPEN = "OpenFile"
+    const val DOWNLOAD = "Download"
+    const val DELETE = "Delete"
+    const val UPLOAD_START = "UploadStart"
+    const val UPLOAD_END = "UploadEnd"
+    const val DRIVES = "GetDrives"
 }

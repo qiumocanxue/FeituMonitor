@@ -14,14 +14,13 @@ import javax.net.ssl.*
 import android.annotation.SuppressLint
 import com.feitu.monitor.common.models.MessageEnvelope
 import java.util.concurrent.CopyOnWriteArraySet
+import okio.ByteString
 
 class MonitorWebSocketManager(private val context: Context) {
 
     private val client: OkHttpClient by lazy { createOkHttpClient() }
     private var webSocket: WebSocket? = null
     private val gson = Gson()
-//    var listener: OnMessageReceivedListener? = null.
-//    多监听器集合
     private val listeners = CopyOnWriteArraySet<OnMessageReceivedListener>()
 
     var isConnected: Boolean = false
@@ -29,7 +28,6 @@ class MonitorWebSocketManager(private val context: Context) {
 
     fun addListener(listener: OnMessageReceivedListener) {
         listeners.add(listener)
-        // 如果加入时底层已经连接，立即同步状态给新页面
         if (isConnected) {
             listener.onStateChange("已连接")
         }
@@ -39,7 +37,6 @@ class MonitorWebSocketManager(private val context: Context) {
         listeners.remove(listener)
     }
 
-    // 测试方法，上线要改
     @SuppressLint("CustomX509TrustManager", "BadHostnameVerifier")
     private fun createOkHttpClient(): OkHttpClient {
         try {
@@ -76,36 +73,33 @@ class MonitorWebSocketManager(private val context: Context) {
             override fun onOpen(webSocket: WebSocket, response: Response) {
                 isConnected = true
                 listeners.forEach { it.onStateChange("已连接") }
-
                 val currentUsername = AuthService(context).getUserName()
-                sendEnvelope(
-                    type = "ClientLogin",
-                    to = "Server",
-                    fromOverride = currentUsername,
-                    payload = emptyMap<String, Any>()
-                )
+                sendEnvelope("ClientLogin", "Server", emptyMap<String, Any>(), currentUsername)
             }
 
             override fun onMessage(webSocket: WebSocket, text: String) {
                 try {
                     val envelope = gson.fromJson(text, MessageEnvelope::class.java)
-                    // 🌟 循环分发最新数据给所有页面
                     listeners.forEach { it.onNewMessage(envelope) }
                 } catch (e: Exception) {
-                    Log.e("WSS", "解析失败: $text", e)
+                    Log.e("WSS", "解析失败", e)
                 }
+            }
+
+            override fun onMessage(webSocket: WebSocket, bytes: ByteString) {
+                listeners.forEach { it.onNewBinaryMessage(bytes) }
             }
 
             override fun onFailure(webSocket: WebSocket, t: Throwable, response: Response?) {
                 isConnected = false
                 listeners.forEach {
-                    it.onStateChange("连接断开")
-                    it.onError(t.message ?: "未知错误")
+                    it.onStateChange("连接异常")
+                    it.onError("网络波动: ${t.message}")
                 }
             }
 
             override fun onClosing(webSocket: WebSocket, code: Int, reason: String) {
-                webSocket.close(1000, null)
+                webSocket?.close(1000, null)
                 isConnected = false
                 listeners.forEach { it.onStateChange("正在关闭") }
             }
@@ -124,22 +118,20 @@ class MonitorWebSocketManager(private val context: Context) {
             RequestId = UUID.randomUUID().toString(),
             Payload = payload
         )
-
-        val json = gson.toJson(envelope)
-        webSocket?.send(json)
-        Log.d("WSS_SEND", "发送数据包: $json")
+        send(gson.toJson(envelope))
     }
 
     fun send(text: String) {
+        if (isConnected) webSocket?.send(text)
+    }
+
+    fun send(bytes: ByteString) {
         if (isConnected) {
-            webSocket?.send(text)
-            Log.d("WSS", "已发送: $text")
-        } else {
-            Log.e("WSS", "发送失败：连接未就绪")
+            webSocket?.send(bytes)
+            Log.d("FileTransfer", ">>> 发送二进制帧: ${bytes.size} 字节")
         }
     }
 
-    @Suppress("unused")
     fun disconnect() {
         webSocket?.close(1000, "User logout")
         isConnected = false

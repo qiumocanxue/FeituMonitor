@@ -1,6 +1,7 @@
 package com.feitu.monitor.remote
 
 import android.content.Intent
+import android.graphics.Color
 import android.os.Bundle
 import android.util.Log
 import android.view.View
@@ -20,6 +21,7 @@ import com.google.android.material.progressindicator.CircularProgressIndicator
 import com.google.gson.Gson
 import java.text.SimpleDateFormat
 import java.util.*
+import androidx.core.content.ContextCompat
 
 class AgentControlActivity : AppCompatActivity(), OnMessageReceivedListener {
 
@@ -153,8 +155,14 @@ class AgentControlActivity : AppCompatActivity(), OnMessageReceivedListener {
         gauge.apply {
             indicatorSize = (64 * d).toInt()
             trackThickness = (6 * d).toInt()
-            setIndicatorColor(color.toColorInt())
-            trackColor = "@color/divider_gray".toColorInt()
+
+            val indicatorColorInt = try {
+                color.toColorInt()
+            } catch (e: Exception) {
+                Color.RED // 发生错误时的后备颜色
+            }
+            setIndicatorColor(indicatorColorInt)
+            trackColor = ContextCompat.getColor(context, R.color.divider_gray)
         }
     }
 

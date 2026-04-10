@@ -19,6 +19,7 @@ import com.github.mikephil.charting.components.XAxis
 import com.github.mikephil.charting.data.*
 import com.github.mikephil.charting.formatter.ValueFormatter
 import com.google.gson.Gson
+import androidx.core.content.ContextCompat
 
 class PerfTrendsActivity : AppCompatActivity(), OnMessageReceivedListener {
 
@@ -26,6 +27,7 @@ class PerfTrendsActivity : AppCompatActivity(), OnMessageReceivedListener {
     private val timeLabels = mutableListOf<String>()
 
     private var rawPoints: List<HistoryPoint> = listOf()
+    private val gson = Gson()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -43,6 +45,8 @@ class PerfTrendsActivity : AppCompatActivity(), OnMessageReceivedListener {
     }
 
     private fun setupChartStyle() {
+        val secondaryTextColor = ContextCompat.getColor(this, R.color.text_secondary)
+        val gridColorHex = "#86868B".toColorInt()
         lineChart.apply {
             description.isEnabled = false
             setTouchEnabled(true)
@@ -62,7 +66,7 @@ class PerfTrendsActivity : AppCompatActivity(), OnMessageReceivedListener {
             xAxis.apply {
                 position = XAxis.XAxisPosition.BOTTOM
                 setDrawGridLines(false)
-                textColor = "@color/text_secondary".toColorInt()
+                textColor = secondaryTextColor
                 granularity = 1f
                 labelCount = 5
                 valueFormatter = object : ValueFormatter() {
@@ -74,7 +78,7 @@ class PerfTrendsActivity : AppCompatActivity(), OnMessageReceivedListener {
             }
 
             axisLeft.apply {
-                textColor = "@color/text_secondary".toColorInt()
+                textColor = secondaryTextColor
                 setAxisMinimum(0f)
                 setAxisMaximum(105f)
                 setLabelCount(6, true)
@@ -88,8 +92,8 @@ class PerfTrendsActivity : AppCompatActivity(), OnMessageReceivedListener {
         if (envelope.Type == "HistoryResponse") {
             runOnUiThread {
                 try {
-                    val json = Gson().toJson(envelope.Payload)
-                    val historyData = Gson().fromJson(json, HistoryResponsePayload::class.java)
+                    val payloadJson = gson.toJson(envelope.Payload)
+                    val historyData = gson.fromJson(payloadJson, HistoryResponsePayload::class.java)
 
                     historyData?.Points?.let {
                         updateChartData(it)
@@ -102,6 +106,8 @@ class PerfTrendsActivity : AppCompatActivity(), OnMessageReceivedListener {
     }
 
     private fun updateChartData(points: List<HistoryPoint>) {
+        if (points.isEmpty()) return
+
         try {
             this.rawPoints = points
 
@@ -129,7 +135,7 @@ class PerfTrendsActivity : AppCompatActivity(), OnMessageReceivedListener {
                 (set as LineDataSet).apply {
                     isHighlightEnabled = true
                     setDrawHorizontalHighlightIndicator(false)
-                    highLightColor = "#66000000".toColorInt()
+                    highLightColor = Color.parseColor("#66000000") // ✅ 规范写法
                     highlightLineWidth = 1f
                 }
             }
@@ -157,6 +163,7 @@ class PerfTrendsActivity : AppCompatActivity(), OnMessageReceivedListener {
         }
     }
 
+    override fun onNewBinaryMessage(bytes: okio.ByteString) {}
     override fun onStateChange(state: String) {}
     override fun onError(error: String) {}
 
